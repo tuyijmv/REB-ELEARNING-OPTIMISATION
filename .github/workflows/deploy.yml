@@ -1,0 +1,93 @@
+name: Deploy REB E-Learning Optimisation
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hadolint/hadolint-action@master
+        with:
+          dockerfile: docker/php/Dockerfile
+          dockerfile: docker/nginx/Dockerfile
+
+  build:
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: docker/php/Dockerfile
+          tags: reb-elearning-php:${{ github.sha }}
+          cache-from: type=registry,ref=reb-elearning-php:buildcache
+          cache-to: type=registry,ref=reb-elearning-php:buildcache,mode=max
+
+      - uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: docker/nginx/Dockerfile
+          tags: reb-elearning-nginx:${{ github.sha }}
+
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Build stack
+        run: docker compose build
+      - name: Start services
+        run: docker compose up -d
+      - name: Wait for MySQL
+        run: |
+          for i in $(seq 1 60); do
+            if docker compose ps | grep -q "mysql.*healthy"; then break; fi
+            sleep 5
+          done
+      - name: Health check
+        run: |
+          for i in $(seq 1 30); do
+            PORT=$(grep MOODLE_PORT .env | cut -d= -f2)
+            if curl -sf http://localhost:$PORT/; then break; fi
+            sleep 5
+          done
+
+  deploy-staging:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v5
+        with:
+          context: .
+          tags: reb-elearning-php:staging
+          push: true
+      - name: Deploy to staging
+        run: |
+          echo "Deploy to staging via Ansible/SSH"
+          # ssh deploy@staging.server "cd /opt/reb && docker compose pull && docker compose up -d"
+
+  deploy-prod:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy to production
+        run: |
+          echo "Deploy to production via Terraform apply + Ansible"
+          # cd terraform && terraform init && terraform apply -auto-approve
+          # cd ../ansible && ansible-playbook -i inventory playbook.yml

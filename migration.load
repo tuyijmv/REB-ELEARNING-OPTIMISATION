@@ -1,0 +1,52 @@
+LOAD DATABASE
+  FROM mysql://root:REB@ICTE2005@127.0.0.1:13306/reblive1
+  INTO postgresql://moodleuser:moodlepass@postgres:5432/moodle
+
+WITH
+  include drop,
+  create tables,
+  create indexes,
+  reset sequences,
+  workers = 8,
+  concurrency = 1
+
+SET
+  PostgreSQL PARAMETERS
+    maintenance_work_mem to '512MB',
+    work_mem to '128MB'
+
+CAST
+  type tinyint to boolean drop typemod using tinyint-to-boolean,
+  type tinyint when (= precision 1) to boolean drop typemod using tinyint-to-boolean,
+  type int with extra auto_increment to serial drop typemod drop default drop not null,
+  type bigint with extra auto_increment to bigserial drop typemod drop default drop not null,
+  type datetime to timestamp drop typemod,
+  type longtext to text drop typemod,
+  type mediumtext to text drop typemod,
+  type tinytext to text drop typemod,
+  type longblob to bytea drop typemod,
+  type mediumblob to bytea drop typemod,
+  type blob to bytea drop typemod,
+  column mdl_user.password to "varchar(255)" drop typemod,
+  column *.password to "varchar(255)" drop typemod
+
+-- Exclude large log tables and temporary tables
+EXCLUDING TABLE NAMES MATCHING
+  ~/mdl_logstore_standard_log/,
+  ~/mdl_log/,
+  ~/mdl_sessions/,
+  ~/mdl_cache_/,
+  ~/mdl_task_adhoc/,
+  ~/mdl_task_log/
+
+-- Sample only specific courses (replace with actual course IDs after running create-dev-sql-dump.sh)
+-- INCLUDING ONLY TABLE NAMES MATCHING
+--   ~/mdl_config/,
+--   ~/mdl_course/ WHERE id IN (1, 2, 3, 4, 5)
+
+BEFORE LOAD DO
+  $$ DROP SCHEMA IF EXISTS public CASCADE; $$,
+  $$ CREATE SCHEMA public; $$
+
+AFTER LOAD DO
+  $$ ALTER TABLE mdl_user ADD CONSTRAINT user_username_unique UNIQUE (username); $$;

@@ -1,0 +1,21 @@
+---
+- name: Configure load balancers
+  hosts: loadbalancers
+  become: yes
+  vars_files:
+    - group_vars/all.yml
+  tasks:
+    - name: Install Nginx and Certbot
+      apt:
+        name:
+          - nginx
+          - certbot
+          - python3-certbot-nginx
+        state: present
+        update_cache: yes
+
+    - name: Ensure Nginx is running
+      service:
+        name: nginx
+        state: started
+        enabled: yes

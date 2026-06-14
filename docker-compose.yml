@@ -1,0 +1,136 @@
+services:
+  # MySQL 8.4 Database
+  mysql:
+    image: mysql:8.4
+    container_name: moodle_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpass}
+      MYSQL_DATABASE: ${DB_NAME:-moodle}
+      MYSQL_USER: ${DB_USER:-moodleuser}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-moodlepass}
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./docker/mysql/initdb.d:/docker-entrypoint-initdb.d
+    networks:
+      - moodle_network
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD}"]
+      start_period: 3600s
+      interval: 60s
+      timeout: 30s
+      retries: 5
+
+  # PHP-FPM
+  php:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: moodle_php
+    restart: unless-stopped
+    user: root
+    volumes:
+      - ${MOODLE_APP_SOURCE:-./moodle_app}:/var/www/html/moodle_app
+      - ./config.php.docker:/var/www/html/config.php.docker:ro
+      - ./moodledata:/var/www/moodledata
+    networks:
+      - moodle_network
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      DB_TYPE: ${DB_TYPE:-mysql}
+      DB_HOST: ${DB_HOST:-mysql}
+      DB_NAME: ${DB_NAME:-moodle}
+      DB_USER: ${DB_USER:-moodleuser}
+      DB_PASSWORD: ${DB_PASSWORD:-moodlepass}
+      DB_PORT: ${DB_PORT:-3306}
+      DB_PREFIX: ${DB_PREFIX:-mdl_}
+      MOODLE_PROTOCOL: ${MOODLE_PROTOCOL:-http}
+      MOODLE_HOST: ${MOODLE_HOST:-localhost}
+      MOODLE_PORT: ${MOODLE_PORT:-8080}
+      MOODLE_WWWROOT: ${MOODLE_WWWROOT:-}
+      MOODLE_DATAROOT: /var/www/moodledata
+      MOODLE_DEBUG: ${MOODLE_DEBUG:-false}
+      MOODLE_MAIL_NOREPLY: ${MOODLE_MAIL_NOREPLY:-}
+      MOODLE_MAIL_PREFIX: ${MOODLE_MAIL_PREFIX:-}
+      MOODLE_REVERSEPROXY: ${MOODLE_REVERSEPROXY:-false}
+      MOODLE_SSLPROXY: ${MOODLE_SSLPROXY:-false}
+      REDIS_HOST: ${REDIS_HOST:-redis}
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      REDIS_DB: ${REDIS_DB:-0}
+      REDIS_PREFIX: ${REDIS_PREFIX:-sessions_}
+      S3_ENDPOINT: ${S3_ENDPOINT:-http://minio:9000}
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY:-minioadmin}
+      S3_SECRET_KEY: ${S3_SECRET_KEY:-minioadmin}
+      S3_BUCKET: ${S3_BUCKET:-moodle}
+      S3_REGION: ${S3_REGION:-us-east-1}
+
+  # Nginx Web Server
+  nginx:
+    build:
+      context: ./docker/nginx
+      dockerfile: Dockerfile
+    container_name: moodle_nginx
+    restart: unless-stopped
+    ports:
+      - "${MOODLE_PORT:-8080}:${MOODLE_PORT:-8080}"
+    environment:
+      PHP_FPM_HOST: ${PHP_FPM_HOST:-php}
+      NGINX_PORT: ${MOODLE_PORT:-8080}
+    volumes:
+      - ${MOODLE_APP_SOURCE:-./moodle_app}:/var/www/html/moodle_app:ro
+      - ./moodledata:/var/www/moodledata
+    networks:
+      - moodle_network
+    depends_on:
+      - php
+
+  # MinIO S3 Storage
+  minio:
+    image: minio/minio:RELEASE.2025-04-22T22-12-26Z
+    container_name: moodle_minio
+    restart: unless-stopped
+    ports:
+      - "${MINIO_PORT:-9000}:9000"
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+      MINIO_REGION_NAME: ${MINIO_REGION:-us-east-1}
+    volumes:
+      - minio_data:/data
+      - ./docker/minio/init.sh:/docker-entrypoint-initdb.d/init.sh:ro
+    networks:
+      - moodle_network
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Redis for sessions and cache
+  redis:
+    image: redis:7-alpine
+    container_name: moodle_redis
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    networks:
+      - moodle_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  moodle_network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+  minio_data:
+  redis_data:

@@ -1,0 +1,50 @@
+---
+- name: Configure application servers for Moodle
+  hosts: appservers
+  become: yes
+  vars_files:
+    - group_vars/all.yml
+  tasks:
+    - name: Install common packages
+      apt:
+        name:
+          - docker.io
+          - docker-compose
+          - git
+          - curl
+          - wget
+          - jq
+          - unzip
+          - redis-server
+          - php-fpm
+          - php-mysql
+          - php-curl
+          - php-gd
+          - php-intl
+          - php-mbstring
+          - php-soap
+          - php-zip
+          - php-xml
+          - php-bcmath
+          - php-exif
+          - php-pcntl
+        state: present
+        update_cache: yes
+      notify: restart php-fpm
+
+    - name: Clone REB E-Learning Optimisation repository
+      git:
+        repo: "https://github.com/tuyijmv/REB-ELEARNING-OPTIMISATION.git"
+        dest: /opt/reb-elearning-optimisation
+        version: main
+
+    - name: Deploy moodle_app via docker-compose
+      docker_compose:
+        project_src: /opt/reb-elearning-optimisation
+        state: present
+
+  handlers:
+    - name: restart php-fpm
+      service:
+        name: php8.2-fpm
+        state: restarted

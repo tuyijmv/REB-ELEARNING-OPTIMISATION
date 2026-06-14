@@ -1,0 +1,53 @@
+---
+- name: Configure database servers
+  hosts: databases
+  become: yes
+  vars_files:
+    - group_vars/all.yml
+  tasks:
+    - name: Install MySQL 8.4
+      apt:
+        name:
+          - mysql-server-8.4
+          - mysql-client-8.4
+          - python3-pymysql
+        state: present
+        update_cache: yes
+
+    - name: Ensure MySQL is running
+      service:
+        name: mysql
+        state: started
+        enabled: yes
+
+    - name: Create moodle database
+      mysql_db:
+        name: "{{ moodle_db_name }}"
+        state: present
+
+    - name: Create moodle user
+      mysql_user:
+        name: "{{ moodle_db_user }}"
+        password: "{{ moodle_db_password }}"
+        priv: "{{ moodle_db_name }}.*:ALL"
+        host: "%"
+        state: present
+
+    - name: Optimize MySQL for Moodle
+      lineinfile:
+        path: /etc/mysql/mysql.conf.d/mysqld.cnf
+        regexp: "^#?{{ item.key }}"
+        line: "{{ item.key }} = {{ item.value }}"
+        state: present
+      loop:
+        - { key: "innodb_buffer_pool_size", value: "2G" }
+        - { key: "innodb_log_file_size", value: "512M" }
+        - { key: "innodb_flush_log_at_trx_commit", value: "2" }
+        - { key: "innodb_flush_method", value: "O_DIRECT" }
+        - { key: "character-set-server", value: "utf8mb4" }
+        - { key: "collation-server", value: "utf8mb4_unicode_ci" }
+
+    - name: Restart MySQL
+      service:
+        name: mysql
+        state: restarted

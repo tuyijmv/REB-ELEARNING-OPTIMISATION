@@ -1,0 +1,16 @@
+- hosts: all
+  become: yes
+  gather_facts: yes
+
+  vars_files:
+    - group_vars/all.yml
+
+  roles:
+    - role: common
+      tags: common
+    - role: appserver
+      tags: appserver
+    - role: database
+      tags: database
+    - role: loadbalancer
+      tags: loadbalancer
