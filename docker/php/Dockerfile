@@ -58,7 +58,7 @@ RUN echo "opcache.enable = 1" >> /usr/local/etc/php/conf.d/opcache.ini \
 WORKDIR /var/www/html
 
 # Copy build scripts from project root
-COPY build.sh moodle-config.json ./
+COPY build.sh config.json ./
 RUN chmod +x build.sh
 
 # Configure SSH for GitHub (for private repositories)
