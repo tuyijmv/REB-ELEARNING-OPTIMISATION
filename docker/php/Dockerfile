@@ -16,6 +16,7 @@ RUN apt-get update && apt-get install -y \
     libicu-dev \
     libpq-dev \
     libmariadb-dev-compat \
+    libmariadb-dev \
     zip \
     unzip \
     && rm -rf /var/lib/apt/lists/*
@@ -66,8 +67,7 @@ RUN mkdir -p -m 0700 ~/.ssh && \
     ssh-keyscan github.com >> ~/.ssh/known_hosts
 
 # Run build script to clone Moodle and plugins
-# Mount SSH socket to enable cloning private repositories
-RUN --mount=type=ssh ./build.sh
+RUN ./build.sh
 
 # Move moodle_app to staging location for volume initialization
 # This allows the entrypoint to copy files to a named volume on first run

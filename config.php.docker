@@ -4,7 +4,7 @@ unset($CFG);
 global $CFG;
 $CFG = new stdClass();
 
-$CFG->dbtype    = getenv('DB_TYPE') ?: 'mysql';
+$CFG->dbtype    = getenv('DB_TYPE') ?: 'mysqli';
 $CFG->dblibrary = 'native';
 $CFG->dbhost    = getenv('DB_HOST') ?: 'mysql';
 $CFG->dbname    = getenv('DB_NAME') ?: 'moodle';
