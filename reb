@@ -134,12 +134,12 @@ setup_local() {
         HOST_PORT=$(find_free_port)
         log_info "Auto-selected host port: $HOST_PORT"
         
-        # Update .env with auto-selected port
+        # Update .env with auto-selected port and DB settings
         if command_exists sed; then
             sed -i "s/^MOODLE_PORT=.*/MOODLE_PORT=$HOST_PORT/" .env
             sed -i "s/^MOODLE_WWWROOT=.*/MOODLE_WWWROOT=http:\/\/localhost:$HOST_PORT/" .env
-            sed -i "s/^DB_TYPE=.*/DB_TYPE=mysql/" .env
-            sed -i "s/^DB_HOST=.*/DB_HOST=mysql/" .env
+            sed -i "s/^DB_TYPE=.*/DB_TYPE=mysqli/" .env
+            sed -i "s/^DB_HOST=.*/DB_HOST=moodle_mysql/" .env
             sed -i "s/^DB_NAME=.*/DB_NAME=moodle/" .env
             sed -i "s/^DB_USER=.*/DB_USER=moodleuser/" .env
             sed -i "s/^DB_PASSWORD=.*/DB_PASSWORD=moodlepass/" .env
