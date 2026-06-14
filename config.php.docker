@@ -32,8 +32,10 @@ $CFG->localcachedir = $CFG->dataroot . '/localcache';
 $CFG->tempdir = $CFG->dataroot . '/temp';
 
 // Session settings
-$CFG->session_handler_class = '\core\session\file';
-$CFG->session_file_save_path = $CFG->dataroot . '/sessions';
+$CFG->session_redis_host = getenv('REDIS_HOST') ?: 'redis';
+$CFG->session_redis_port = getenv('REDIS_PORT') ?: '6379';
+$CFG->session_redis_database = getenv('REDIS_DB') ?: '0';
+$CFG->session_redis_prefix = getenv('REDIS_PREFIX') ?: 'moodle_session_';
 
 // Debugging - set via environment variable
 $debug = getenv('MOODLE_DEBUG');

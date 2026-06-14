@@ -218,9 +218,15 @@ setup_local() {
         docker compose exec -T php bash -c "echo '' >> /var/www/html/moodle_app/config.php && echo '\$CFG->reverseproxy = false;' >> /var/www/html/moodle_app/config.php && echo '\$CFG->sslproxy = false;' >> /var/www/html/moodle_app/config.php"
     fi
     
-    # Setup Redis session handler
-    log_info "Configuring Redis session handler..."
-    docker compose exec -T php bash -c "if grep -q 'session_handler_class' /var/www/html/moodle_app/config.php; then sed -i 's/session_handler_class.*/session_handler_class = \\\\core\\\\session\\\\redis;/' /var/www/html/moodle_app/config.php; else echo '' >> /var/www/html/moodle_app/config.php && echo '\\\$CFG->session_handler_class = \"\\\\core\\\\session\\\\redis\";' >> /var/www/html/moodle_app/config.php; fi"
+    # Ensure Redis session settings are in config.php
+    log_info "Configuring Redis session settings..."
+    docker compose exec -T php bash -c "cat >> /var/www/html/moodle_app/config.php << 'EOF2'
+
+\$CFG->session_redis_host = 'redis';
+\$CFG->session_redis_port = 6379;
+\$CFG->session_redis_database = 0;
+\$CFG->session_redis_prefix = 'moodle_session_';
+EOF2"
     
     log_success "=============================================="
     log_success "REB E-Learning Optimisation is ready!"
