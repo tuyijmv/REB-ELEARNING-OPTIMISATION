@@ -7,6 +7,7 @@ RUN apt-get update && apt-get install -y \
     curl \
     jq \
     openssh-client \
+    imagemagick \
     libpng-dev \
     libjpeg-dev \
     libfreetype6-dev \
@@ -58,8 +59,8 @@ RUN echo "opcache.enable = 1" >> /usr/local/etc/php/conf.d/opcache.ini \
 # Set working directory
 WORKDIR /var/www/html
 
-# Copy build scripts from project root
-COPY build.sh config.json ./
+# Copy build scripts and configs from project root
+COPY build.sh config.json moodle-config.json ./
 RUN chmod +x build.sh
 
 # Configure SSH for GitHub (for private repositories)
@@ -68,6 +69,15 @@ RUN mkdir -p -m 0700 ~/.ssh && \
 
 # Run build script to clone Moodle and plugins
 RUN ./build.sh
+
+# Ship the customization script inside moodle_app so it is included when the
+# entrypoint copies the staged app into the named volume on first run.
+# It lives outside the 'public/' web root, so it is not web-accessible.
+COPY customize_moodle.php /var/www/html/moodle_app/customize_moodle.php
+RUN chmod +x /var/www/html/moodle_app/customize_moodle.php
+
+# Copy pre-built branding assets into the Moodle app directory
+COPY assets /var/www/html/moodle_app/assets/
 
 # Move moodle_app to staging location for volume initialization
 # This allows the entrypoint to copy files to a named volume on first run

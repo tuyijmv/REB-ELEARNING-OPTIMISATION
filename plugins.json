@@ -1,0 +1,186 @@
+{
+  "plugins": [
+    {
+      "name": "theme_moove",
+      "repo": "https://github.com/willianmano/moodle-theme_moove.git",
+      "dest": "public/theme/moove",
+      "branch": "MOODLE_501_STABLE",
+      "fallback_version": "main"
+    },
+    {
+      "name": "tool_coursefields",
+      "repo": "https://github.com/moodle-an-hochschulen/moodle-tool_coursefields.git",
+      "dest": "public/admin/tool/coursefields",
+      "branch": "MOODLE_501_STABLE",
+      "fallback_version": "main"
+    },
+    {
+      "name": "auth_antihammer",
+      "repo": "https://github.com/sebsoftnl/moodle-auth_antihammer.git",
+      "dest": "public/auth/antihammer",
+      "branch": "MOODLE_501_STABLE",
+      "fallback_version": "master"
+    },
+    {
+      "name": "auth_oidc",
+      "repo": "https://github.com/microsoft/moodle-auth_oidc.git",
+      "dest": "public/auth/oidc",
+      "branch": "MOODLE_501_STABLE",
+      "fallback_version": "master"
+    },
+    {
+      "name": "block_accessibility",
+      "repo": "https://github.com/brickfield/moodle-block_accessibility.git",
+      "dest": "public/blocks/accessibility",
+      "branch": "MOODLE_501_STABLE",
+      "fallback_version": "main"
+    },
+    {
+      "name": "block_completion_progress",
+      "repo": "https://github.com/jonof/moodle-block_completion_progress.git",
+      "dest": "public/blocks/completion_progress",
+      "branch": "MOODLE_501_STABLE",
+      "fallback_version": "master"
+    },
+    {
+      "name": "block_progress",
+      "repo": "https://github.com/deraadt/Moodle-block_progress.git",
+      "dest": "public/blocks/progress",
+      "branch": "MOODLE_501_STABLE",
+      "fallback_version": "master"
+    },
+    {
+      "name": "format_grid",
+      "repo": "https://github.com/gjbarnard/moodle-format_grid.git",
+      "dest": "public/course/format/grid",
+      "branch": "MOODLE_501_STABLE",
+      "fallback_version": "main"
+    },
+    {
+      "name": "customfield_dynamic",
+      "repo": "https://github.com/soorajsingh/moodle-customfield_dynamic.git",
+      "dest": "public/customfield/field/dynamic",
+      "branch": "MOODLE_501_STABLE",
+      "fallback_version": "master"
+    },
+    {
+      "name": "enrol_attributes",
+      "repo": "https://github.com/ndunand/moodle-enrol_attributes.git",
+      "dest": "public/enrol/attributes",
+      "branch": "MOODLE_501_STABLE",
+      "fallback_version": "master"
+    },
+    {
+      "name": "filter_wiris",
+      "repo": "https://github.com/wiris/moodle-filter_wiris.git",
+      "dest": "public/filter/wiris",
+      "branch": "MOODLE_501_STABLE",
+      "fallback_version": "main"
+    },
+    {
+      "name": "local_bulkenrol",
+      "repo": "https://github.com/moodle-an-hochschulen/moodle-local_bulkenrol.git",
+      "dest": "public/local/bulkenrol",
+      "branch": "MOODLE_501_STABLE",
+      "fallback_version": "main"
+    },
+    {
+      "name": "local_kopere_dashboard",
+      "repo": "https://github.com/EduardoKrausME/moodle-local-kopere_dashboard.git",
+      "dest": "public/local/kopere_dashboard",
+      "branch": "MOODLE_501_STABLE",
+      "fallback_version": "master"
+    },
+    {
+      "name": "local_mr",
+      "repo": "https://github.com/open-lms-open-source/moodle-local_mr.git",
+      "dest": "public/local/mr",
+      "branch": "MOODLE_501_STABLE",
+      "fallback_version": "master"
+    },
+    {
+      "name": "local_o365",
+      "repo": "https://github.com/microsoft/moodle-local_o365.git",
+      "dest": "public/local/o365",
+      "branch": "MOODLE_501_STABLE",
+      "fallback_version": "master"
+    },
+    {
+      "name": "mod_activitymap",
+      "repo": "https://github.com/bytebang/moodle-mod_activitymap.git",
+      "dest": "public/mod/activitymap",
+      "branch": "MOODLE_501_STABLE",
+      "fallback_version": "master"
+    },
+    {
+      "name": "mod_attendance",
+      "repo": "https://github.com/danmarsden/moodle-mod_attendance.git",
+      "dest": "public/mod/attendance",
+      "branch": "MOODLE_501_STABLE",
+      "fallback_version": "MOODLE_500_STABLE"
+    },
+    {
+      "name": "booktool_importepub",
+      "repo": "https://github.com/HaakonME/moodle-booktool_importepub.git",
+      "dest": "public/mod/book/tool/importepub",
+      "branch": "MOODLE_501_STABLE",
+      "fallback_version": "master"
+    },
+    {
+      "name": "mod_customcert",
+      "repo": "https://github.com/mdjnelson/moodle-mod_customcert.git",
+      "dest": "public/mod/customcert",
+      "branch": "MOODLE_501_STABLE",
+      "fallback_version": "MOODLE_500_STABLE"
+    },
+    {
+      "name": "mod_hvp",
+      "repo": "https://github.com/h5p/moodle-mod_hvp.git",
+      "dest": "public/mod/hvp",
+      "branch": "MOODLE_501_STABLE",
+      "fallback_version": "stable"
+    },
+    {
+      "name": "mod_organizer",
+      "repo": "https://github.com/academic-moodle-cooperation/moodle-mod_organizer.git",
+      "dest": "public/mod/organizer",
+      "branch": "MOODLE_501_STABLE",
+      "fallback_version": "main"
+    },
+    {
+      "name": "report_benchmark",
+      "repo": "https://github.com/mikasmart/moodle-report_benchmark.git",
+      "dest": "public/report/benchmark",
+      "branch": "MOODLE_501_STABLE",
+      "fallback_version": "master"
+    },
+    {
+      "name": "local_reblibrary",
+      "repo": "https://github.com/REB-ICTE/local_reblibrary.git",
+      "dest": "public/local/reblibrary",
+      "branch": "MOODLE_501_STABLE",
+      "fallback_version": "dev"
+    },
+    {
+      "name": "local_ultimate",
+      "repo": "https://github.com/willianmano/moodle-local_ultimate.git",
+      "dest": "public/local/ultimate",
+      "branch": "MOODLE_501_STABLE",
+      "fallback_version": "main"
+    },
+    {
+      "name": "local_ultimate_market",
+      "repo": "https://github.com/willianmano/moodle-local_ultimate_market.git",
+      "dest": "public/local/ultimate_market",
+      "branch": "MOODLE_501_STABLE",
+      "fallback_version": "main"
+    },
+    {
+      "name": "block_ultimate",
+      "repo": "https://github.com/willianmano/moodle-block_ultimate.git",
+      "dest": "public/block/ultimate",
+      "branch": "MOODLE_501_STABLE",
+      "fallback_version": "main"
+    }
+  ]
+}

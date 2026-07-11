@@ -265,7 +265,15 @@ EOF2"
     # (and any other created files) end up root-owned. PHP-FPM runs as www-data,
     # so fix ownership of the moodle_app volume to avoid "Permission denied".
     docker compose exec -T moodle_php chown -R www-data:www-data /var/www/html/moodle_app
-    
+
+    # Run upgrade to register all plugins in the database
+    log_info "Running Moodle upgrade..."
+    docker compose exec -T moodle_php php /var/www/html/moodle_app/admin/cli/upgrade.php --non-interactive
+
+    # Apply REB branding customizations
+    log_info "Applying REB customizations..."
+    docker compose exec -T moodle_php php /var/www/html/moodle_app/customize_moodle.php
+
     log_success "=============================================="
     log_success "REB E-Learning Optimisation is ready!"
     log_success "=============================================="
