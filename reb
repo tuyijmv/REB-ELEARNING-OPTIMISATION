@@ -151,6 +151,8 @@ setup_local() {
         log_info ".env already exists, skipping configuration."
     fi
     
+    HOST_PORT=$(grep "^MOODLE_PORT=" .env | cut -d= -f2)
+    
     # Build Moodle
     log_info "Building Moodle application..."
     ./build.sh
@@ -174,6 +176,7 @@ setup_local() {
     
     # Install Composer dependencies
     log_info "Running composer install..."
+    docker compose exec -T moodle_php git config --global --add safe.directory /var/www/html/moodle_app || true
     docker compose exec -T moodle_php composer install -d /var/www/html/moodle_app || true
     
     # Wait for PHP container to be ready
