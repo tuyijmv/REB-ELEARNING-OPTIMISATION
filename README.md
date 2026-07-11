@@ -302,6 +302,24 @@ Add plugins with:
 
 See `PLUGINS.md` for available plugins.
 
+## Customization (REB branding)
+
+After Moodle is installed, the stack automatically applies REB branding via
+`customize_moodle.php` (shipped inside the image at `moodle_app/customize_moodle.php`):
+
+- Sets **Moove** as the active theme
+- Applies REB brand colors (`#00A0DC` blue, `#00A651` green) and custom SCSS
+- Generates and uploads a **logo**, **favicon**, **login banner**, and a
+  per-course **cover image** (PHP-GD, no external assets required)
+- Creates the **Science / Languages / Humanities** categories
+- Creates sample courses (Mathematics, Chemistry, Biology, English, Kinyarwanda, History) grouped into those categories
+
+The script is **idempotent** (re-running it will not duplicate courses/categories).
+
+- When using `./reb --local`, branding is applied automatically after the installer.
+- With a plain `docker compose up -d`, it runs once on first boot (guarded by `moodledata/.reb_customized`).
+- To re-apply at any time: `./setup/reb_customize.sh`
+
 ## Migration
 
 See `MIGRATION.md` for migrating existing Moodle instances.
