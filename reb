@@ -103,6 +103,29 @@ find_free_port() {
     echo 8080
 }
 
+# Ensure a key exists in .env, adding it (or filling an empty value) with a default
+ensure_env_var() {
+    local key="$1"
+    local value="$2"
+    local file="${3:-.env}"
+    if grep -q "^${key}=" "$file" 2>/dev/null; then
+        local current
+        current=$(sed -n "s/^[[:space:]]*${key}[[:space:]]*=[[:space:]]*\(.*\)[[:space:]]*$/\1/p" "$file" | head -n1)
+        if [ -z "$current" ]; then
+            sed -i "s|^${key}=.*|${key}=${value}|" "$file"
+        fi
+    else
+        echo "${key}=${value}" >> "$file"
+    fi
+}
+
+# Robustly read a value from .env (tolerant of spaces around '=' and comments)
+read_env_var() {
+    local key="$1"
+    local file="${2:-.env}"
+    sed -n "s/^[[:space:]]*${key}[[:space:]]*=[[:space:]]*\(.*\)[[:space:]]*$/\1/p" "$file" | head -n1
+}
+
 setup_local() {
     MODE="local"
     log_info "=== REB E-Learning Optimisation - Local Docker Mode ==="
@@ -129,29 +152,35 @@ setup_local() {
     if [ ! -f ".env" ]; then
         log_info "Setting up .env file..."
         cp .env.example .env
-        
-        # Find free port
+    fi
+
+    # Ensure all required variables exist (and are non-empty) with safe defaults.
+    # This makes re-runs on an existing .env robust instead of passing empty values.
+    ensure_env_var "DB_TYPE" "mysqli"
+    ensure_env_var "DB_HOST" "moodle_mysql"
+    ensure_env_var "DB_NAME" "moodle"
+    ensure_env_var "DB_USER" "moodleuser"
+    ensure_env_var "DB_PASSWORD" "moodlepass"
+    ensure_env_var "DB_ROOT_PASSWORD" "rootpass"
+    ensure_env_var "DB_PORT" "3306"
+
+    # Select a free host port only if one is not already configured
+    if [ -z "$(read_env_var MOODLE_PORT)" ]; then
         HOST_PORT=$(find_free_port)
         log_info "Auto-selected host port: $HOST_PORT"
-        
-        # Update .env with auto-selected port and DB settings
-        if command_exists sed; then
-            sed -i "s/^MOODLE_PORT=.*/MOODLE_PORT=$HOST_PORT/" .env
-            sed -i "s/^MOODLE_WWWROOT=.*/MOODLE_WWWROOT=http:\/\/localhost:$HOST_PORT/" .env
-            sed -i "s/^DB_TYPE=.*/DB_TYPE=mysqli/" .env
-            sed -i "s/^DB_HOST=.*/DB_HOST=moodle_mysql/" .env
-            sed -i "s/^DB_NAME=.*/DB_NAME=moodle/" .env
-            sed -i "s/^DB_USER=.*/DB_USER=moodleuser/" .env
-            sed -i "s/^DB_PASSWORD=.*/DB_PASSWORD=moodlepass/" .env
-            sed -i "s/^DB_ROOT_PASSWORD=.*/DB_ROOT_PASSWORD=rootpass/" .env
-        fi
-        
-        log_success ".env configured with port $HOST_PORT"
+        ensure_env_var "MOODLE_PORT" "$HOST_PORT"
     else
-        log_info ".env already exists, skipping configuration."
+        HOST_PORT=$(read_env_var MOODLE_PORT)
+        log_info "Using existing host port: $HOST_PORT"
     fi
-    
-    HOST_PORT=$(grep "^MOODLE_PORT=" .env | cut -d= -f2)
+
+    # Keep MOODLE_WWWROOT in sync with the selected port
+    ensure_env_var "MOODLE_WWWROOT" "http://localhost:$HOST_PORT"
+    sed -i "s|^MOODLE_WWWROOT=.*|MOODLE_WWWROOT=http://localhost:$HOST_PORT|" .env
+
+    log_success ".env configured with port $HOST_PORT"
+
+    HOST_PORT=$(read_env_var MOODLE_PORT)
     
     # Start Docker Compose
     log_info "Starting Docker Compose services..."
@@ -181,13 +210,13 @@ setup_local() {
     # Run Moodle CLI installer if config.php is missing
     if ! docker compose exec -T moodle_php test -f /var/www/html/moodle_app/config.php 2>/dev/null; then
         log_info "Running Moodle CLI installer..."
-        MOODLE_WWWROOT=$(grep MOODLE_WWWROOT .env | cut -d= -f2)
-        DB_TYPE=$(grep DB_TYPE .env | cut -d= -f2)
-        DB_NAME=$(grep DB_NAME .env | cut -d= -f2)
-        DB_USER=$(grep DB_USER .env | cut -d= -f2)
-        DB_PASS=$(grep DB_PASSWORD .env | cut -d= -f2)
-        DB_HOST=$(grep DB_HOST .env | cut -d= -f2)
-        DB_PORT=$(grep DB_PORT .env | cut -d= -f2)
+        MOODLE_WWWROOT=$(read_env_var MOODLE_WWWROOT)
+        DB_TYPE=$(read_env_var DB_TYPE)
+        DB_NAME=$(read_env_var DB_NAME)
+        DB_USER=$(read_env_var DB_USER)
+        DB_PASS=$(read_env_var DB_PASSWORD)
+        DB_HOST=$(read_env_var DB_HOST)
+        DB_PORT=$(read_env_var DB_PORT)
         
         docker compose exec -T moodle_php php /var/www/html/moodle_app/admin/cli/install.php \
             --wwwroot="$MOODLE_WWWROOT" \
