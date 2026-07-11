@@ -153,10 +153,6 @@ setup_local() {
     
     HOST_PORT=$(grep "^MOODLE_PORT=" .env | cut -d= -f2)
     
-    # Build Moodle
-    log_info "Building Moodle application..."
-    ./build.sh
-    
     # Start Docker Compose
     log_info "Starting Docker Compose services..."
     docker compose up -d

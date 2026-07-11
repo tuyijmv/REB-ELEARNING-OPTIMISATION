@@ -27,7 +27,7 @@ services:
     restart: unless-stopped
     user: root
     volumes:
-      - ${MOODLE_APP_SOURCE:-./moodle_app}:/var/www/html/moodle_app
+      - moodle_app:/var/www/html/moodle_app
       - ./config.php.docker:/var/www/html/config.php.docker:ro
       - ./moodledata:/var/www/moodledata
     networks:
@@ -76,7 +76,7 @@ services:
       PHP_FPM_HOST: ${PHP_FPM_HOST:-moodle_php}
       NGINX_PORT: ${MOODLE_PORT:-8080}
     volumes:
-      - ${MOODLE_APP_SOURCE:-./moodle_app}:/var/www/html/moodle_app:ro
+      - moodle_app:/var/www/html/moodle_app:ro
       - ./moodledata:/var/www/moodledata
     networks:
       - moodle_network
@@ -130,3 +130,4 @@ volumes:
   mysql_data:
   minio_data:
   redis_data:
+  moodle_app:

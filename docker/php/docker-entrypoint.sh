@@ -60,14 +60,6 @@ else
     echo "Skipping permission changes for moodle_app (host mount detected)..."
 fi
 
-# Copy Moodle config if it doesn't exist
-if [ ! -f "/var/www/html/moodle_app/config.php" ] && [ -f "/var/www/html/config.php.docker" ]; then
-    echo "Copying config.php.docker to moodle_app/config.php..."
-    cp /var/www/html/config.php.docker /var/www/html/moodle_app/config.php
-    chown www-data:www-data /var/www/html/moodle_app/config.php
-    echo "Config file created successfully."
-fi
-
 echo "Starting PHP-FPM..."
 
 # Execute PHP-FPM (it will run worker processes as www-data based on php-fpm.conf)
