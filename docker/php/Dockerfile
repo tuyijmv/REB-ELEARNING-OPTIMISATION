@@ -59,10 +59,6 @@ WORKDIR /var/www/html
 COPY build.sh config.json plugins.json moodle-config.json ./
 RUN chmod +x build.sh
 
-# Configure SSH for GitHub (for private repositories)
-RUN mkdir -p -m 0700 ~/.ssh && \
-    ssh-keyscan github.com >> ~/.ssh/known_hosts
-
 # Run build script to clone Moodle and plugins
 RUN ./build.sh
 
