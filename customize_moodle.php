@@ -20,29 +20,7 @@
 
 define('CLI_SCRIPT', true);
 
-// ---------------------------------------------------------------------------
-// Locate config.php. Moodle 5.1 keeps config.php at the install root and the
-// web server document root is the 'public/' sub-directory, so we search the
-// most likely locations rather than assuming one fixed path.
-// ---------------------------------------------------------------------------
-$config_candidates = [
-    __DIR__ . '/config.php',
-    '/var/www/html/moodle_app/config.php',
-    '/var/www/html/config.php',
-];
-$config_found = false;
-foreach ($config_candidates as $candidate) {
-    if (file_exists($candidate)) {
-        require_once($candidate);
-        $config_found = true;
-        break;
-    }
-}
-if (!$config_found) {
-    fwrite(STDERR, "ERROR: Could not locate config.php. Is Moodle installed yet?\n");
-    exit(1);
-}
-
+require_once(__DIR__ . '/config.php');
 require_once($CFG->libdir . '/adminlib.php');
 require_once($CFG->dirroot . '/course/lib.php');
 
