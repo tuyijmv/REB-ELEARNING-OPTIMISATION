@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Moodle 5.1 (Build: 20251006) e-learning platform running on Docker with MariaDB 11.4. Uses `build.sh` to assemble Moodle core with custom plugins defined in `config.json`.
 
-**Note:** The Moodle web root is `moodle_app/` (the directory containing `index.php`). nginx is configured with `root /var/www/html/moodle_app;`.
+**Important:** Moodle 5.0+ uses a new directory structure where the web root is `moodle_app/public/` instead of `moodle_app/`. This improves security by keeping core files outside the web root.
 
 ## Current Status
 
@@ -127,8 +127,12 @@ docker compose exec php bash
 - `build.sh` clones repositories into `moodle_app/` with `--recursive` flag to initialize git submodules
 - Custom plugins defined in `plugins` array (currently: mod_hvp H5P plugin)
 
-### Directory Structure
-- `moodle_app/` - Moodle core files and **web root** (contains `index.php`, `config.php`, `lib/`, `mod/`, etc.)
+### Directory Structure (Moodle 5.0+)
+- `moodle_app/` - Moodle core files (NOT the web root)
+- `moodle_app/public/` - **Web root** (nginx/Apache should point here)
+- `moodle_app/public/config.php` - Main configuration file
+- `moodle_app/lib/` - Core libraries (outside web root for security)
+- `moodle_app/mod/` - Activity modules (outside web root)
 - `docker/mariadb/` - MariaDB configuration and initialization scripts
 - `docker/minio/` - MinIO S3 storage initialization scripts
 - `docker/nginx/` - Nginx configuration
@@ -174,7 +178,7 @@ Each plugin has:
 
 **Core modifications**: Located in `moodle_app/`. Note that core is a git clone and may be overwritten on upgrades. Prefer plugins or theme overrides for customizations.
 
-**Configuration**: `config.php` is created at `moodle_app/config.php` (the web root) by the installer.
+**Configuration**: In Moodle 5.0+, `config.php` must be placed in `moodle_app/public/config.php` (not in the root).
 
 **Git structure**: `moodle_app/.git` is Moodle's repository. Parent directory is not version controlled.
 

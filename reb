@@ -261,6 +261,11 @@ setup_local() {
 \$CFG->session_redis_prefix = 'moodle_session_';
 EOF2"
     
+    # The installer and the config appends above run as root, so config.php
+    # (and any other created files) end up root-owned. PHP-FPM runs as www-data,
+    # so fix ownership of the moodle_app volume to avoid "Permission denied".
+    docker compose exec -T moodle_php chown -R www-data:www-data /var/www/html/moodle_app
+    
     log_success "=============================================="
     log_success "REB E-Learning Optimisation is ready!"
     log_success "=============================================="
