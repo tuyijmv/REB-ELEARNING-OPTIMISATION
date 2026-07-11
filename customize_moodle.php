@@ -44,7 +44,6 @@ if (!$config_found) {
 }
 
 require_once($CFG->libdir . '/adminlib.php');
-require_once($CFG->libdir . '/coursecatlib.php');
 require_once($CFG->dirroot . '/course/lib.php');
 
 global $DB, $CFG;
