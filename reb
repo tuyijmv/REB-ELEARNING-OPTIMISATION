@@ -119,11 +119,16 @@ ensure_env_var() {
     fi
 }
 
-# Robustly read a value from .env (tolerant of spaces around '=' and comments)
+# Robustly read a value from .env (tolerant of spaces around '=' and comments).
+# Surrounding single/double quotes are stripped to match docker compose's parsing.
 read_env_var() {
     local key="$1"
     local file="${2:-.env}"
-    sed -n "s/^[[:space:]]*${key}[[:space:]]*=[[:space:]]*\(.*\)[[:space:]]*$/\1/p" "$file" | head -n1
+    local val
+    val=$(sed -n "s/^[[:space:]]*${key}[[:space:]]*=[[:space:]]*\(.*\)[[:space:]]*$/\1/p" "$file" | head -n1)
+    val="${val#\"}"; val="${val%\"}"
+    val="${val#\'}"; val="${val%\'}"
+    echo "$val"
 }
 
 setup_local() {
