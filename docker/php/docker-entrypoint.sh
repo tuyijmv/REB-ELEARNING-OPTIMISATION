@@ -50,14 +50,10 @@ echo "Setting permissions for moodledata..."
 chown -R www-data:www-data /var/www/moodledata
 chmod -R 0777 /var/www/moodledata
 
-# Set proper permissions for moodle_app
-# Only change ownership if moodle_app is from a volume (not a host mount)
-# Host mounts will maintain host permissions
-if [ -d "/var/www/html/moodle_app" ] && [ ! -d "/var/www/html/moodle_app/.git" ]; then
-    echo "Setting permissions for moodle_app (volume-based)..."
+# Set proper permissions for moodle_app (always a named volume in local mode)
+if [ -d "/var/www/html/moodle_app" ]; then
+    echo "Setting permissions for moodle_app..."
     chown -R www-data:www-data /var/www/html/moodle_app
-else
-    echo "Skipping permission changes for moodle_app (host mount detected)..."
 fi
 
 echo "Starting PHP-FPM..."

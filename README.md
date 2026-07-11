@@ -209,7 +209,7 @@ ansible-playbook -i inventory/hosts.ini playbook.yml
 
 The `docker/nginx/default.conf.template` provides:
 
-- Root set to `/var/www/html/moodle_app/public` (Moodle 5.0+ style)
+- Root set to `/var/www/html/moodle_app` (Moodle web root containing `index.php`)
 - Static file caching with 30-day expiry
 - PHP-FPM proxy via Docker DNS resolver
 - Security headers (deny hidden files, vendor, node_modules)
