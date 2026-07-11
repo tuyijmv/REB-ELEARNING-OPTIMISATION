@@ -1,13 +1,11 @@
 # syntax=docker/dockerfile:1
-FROM php:8.2-fpm
+FROM php:8.2-fpm-bookworm
 
 # Install system dependencies
-RUN apt-get update && apt-get install -y \
+RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y --no-install-recommends \
     git \
     curl \
     jq \
-    openssh-client \
-    imagemagick \
     libpng-dev \
     libjpeg-dev \
     libfreetype6-dev \
@@ -16,8 +14,6 @@ RUN apt-get update && apt-get install -y \
     libzip-dev \
     libicu-dev \
     libpq-dev \
-    libmariadb-dev-compat \
-    libmariadb-dev \
     zip \
     unzip \
     && rm -rf /var/lib/apt/lists/*
@@ -60,7 +56,7 @@ RUN echo "opcache.enable = 1" >> /usr/local/etc/php/conf.d/opcache.ini \
 WORKDIR /var/www/html
 
 # Copy build scripts and configs from project root
-COPY build.sh config.json moodle-config.json ./
+COPY build.sh config.json plugins.json moodle-config.json ./
 RUN chmod +x build.sh
 
 # Configure SSH for GitHub (for private repositories)

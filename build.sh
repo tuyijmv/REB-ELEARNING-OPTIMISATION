@@ -71,7 +71,16 @@ fi
 
 # 2. Resolve configuration file
 if [ ! -f "$CONFIG_FILE" ]; then
-  echo "Error: Configuration file '$CONFIG_FILE' not found."
+  for candidate in plugins.json config.json moodle-config.json; do
+    if [ -f "$candidate" ]; then
+      CONFIG_FILE="$candidate"
+      break
+    fi
+  done
+fi
+
+if [ ! -f "$CONFIG_FILE" ]; then
+  echo "Error: Configuration file 'plugins.json' not found. Tried: plugins.json, config.json, moodle-config.json"
   exit 1
 fi
 
@@ -108,10 +117,10 @@ if [ "$PLUGINS_COUNT" -gt 0 ]; then
 
   for i in $(jq -c '.plugins[]?' "$CONFIG_FILE"); do
     PLUGIN_NAME=$(echo "$i" | jq -r '.name // "unknown"')
-    PLUGIN_REPO=$(echo "$i" | jq -r '.repo // empty')
+    PLUGIN_REPO=$(echo "$i" | jq -r '.repo // .repository // empty')
     PLUGIN_BRANCH=$(echo "$i" | jq -r '.branch // empty')
-    PLUGIN_FALLBACK=$(echo "$i" | jq -r '.fallback_version // empty')
-    PLUGIN_DEST=$(echo "$i" | jq -r '.dest // empty')
+    PLUGIN_FALLBACK=$(echo "$i" | jq -r '.fallback_version // .version // empty')
+    PLUGIN_DEST=$(echo "$i" | jq -r '.dest // .destination // empty')
 
     if [ -z "$PLUGIN_REPO" ] || [ -z "$PLUGIN_DEST" ]; then
       echo "  -> [SKIP] Plugin '$PLUGIN_NAME' is missing repository or destination."
