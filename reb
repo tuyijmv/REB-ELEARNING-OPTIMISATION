@@ -174,13 +174,13 @@ setup_local() {
     
     # Install Composer dependencies
     log_info "Running composer install..."
-    docker compose exec -T php composer install -d /var/www/html/moodle_app || true
+    docker compose exec -T moodle_php composer install -d /var/www/html/moodle_app || true
     
     # Wait for PHP container to be ready
     sleep 5
     
     # Run Moodle CLI installer if config.php is missing
-    if ! docker compose exec -T php test -f /var/www/html/moodle_app/config.php 2>/dev/null; then
+    if ! docker compose exec -T moodle_php test -f /var/www/html/moodle_app/config.php 2>/dev/null; then
         log_info "Running Moodle CLI installer..."
         MOODLE_WWWROOT=$(grep MOODLE_WWWROOT .env | cut -d= -f2)
         DB_TYPE=$(grep DB_TYPE .env | cut -d= -f2)
@@ -190,7 +190,7 @@ setup_local() {
         DB_HOST=$(grep DB_HOST .env | cut -d= -f2)
         DB_PORT=$(grep DB_PORT .env | cut -d= -f2)
         
-        docker compose exec -T php php /var/www/html/moodle_app/admin/cli/install.php \
+        docker compose exec -T moodle_php php /var/www/html/moodle_app/admin/cli/install.php \
             --wwwroot="$MOODLE_WWWROOT" \
             --dbtype="$DB_TYPE" \
             --dbname="$DB_NAME" \
@@ -213,14 +213,14 @@ setup_local() {
     fi
     
     # Append reverse proxy settings to config.php
-    if docker compose exec -T php test -f /var/www/html/moodle_app/config.php 2>/dev/null; then
+    if docker compose exec -T moodle_php test -f /var/www/html/moodle_app/config.php 2>/dev/null; then
         log_info "Updating config.php proxy settings..."
-        docker compose exec -T php bash -c "echo '' >> /var/www/html/moodle_app/config.php && echo '\$CFG->reverseproxy = false;' >> /var/www/html/moodle_app/config.php && echo '\$CFG->sslproxy = false;' >> /var/www/html/moodle_app/config.php"
+        docker compose exec -T moodle_php bash -c "echo '' >> /var/www/html/moodle_app/config.php && echo '\$CFG->reverseproxy = false;' >> /var/www/html/moodle_app/config.php && echo '\$CFG->sslproxy = false;' >> /var/www/html/moodle_app/config.php"
     fi
     
     # Ensure Redis session settings are in config.php
     log_info "Configuring Redis session settings..."
-    docker compose exec -T php bash -c "cat >> /var/www/html/moodle_app/config.php << 'EOF2'
+    docker compose exec -T moodle_php bash -c "cat >> /var/www/html/moodle_app/config.php << 'EOF2'
 
 \$CFG->session_redis_host = 'redis';
 \$CFG->session_redis_port = 6379;
