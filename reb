@@ -244,10 +244,11 @@ setup_local() {
         log_success "Moodle installed successfully."
     else
         log_info "Moodle already configured (config.php exists). Skipping installer."
+
     fi
 
     docker compose exec -T moodle_php php /var/www/html/moodle_app/admin/cli/cfg.php --name=theme --set=moove 2>/dev/null || true
-
+    
     # Append reverse proxy settings to config.php
     if docker compose exec -T moodle_php test -f /var/www/html/moodle_app/config.php 2>/dev/null; then
         log_info "Updating config.php proxy settings..."
