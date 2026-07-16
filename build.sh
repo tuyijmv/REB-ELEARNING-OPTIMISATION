@@ -102,8 +102,36 @@ fi
 # 5. Clone Moodle core
 echo "----------------------------------------"
 echo "Cloning Moodle core (branch: $MOODLE_BRANCH)..."
-git clone --depth 1 --branch "$MOODLE_BRANCH" https://github.com/moodle/moodle.git "$DEST_FOLDER"
-echo "Moodle core downloaded successfully."
+
+# Tune git for large/slow/cloudflare-proxied clones and retry on transient
+# network failures (e.g. "RPC failed; curl 92 ... early EOF").
+git config --global http.postBuffer 524288000
+git config --global http.lowSpeedLimit 0
+git config --global http.lowSpeedTime 999999
+git config --global http.version HTTP/1.1
+
+clone_moodle_core() {
+  if [ -d "$DEST_FOLDER/.git" ] || [ -f "$DEST_FOLDER/version.php" ]; then
+    echo "Moodle core already present in '$DEST_FOLDER', skipping clone."
+    return 0
+  fi
+  for attempt in 1 2 3 4 5; do
+    echo "  -> Clone attempt $attempt/5..."
+    rm -rf "$DEST_FOLDER"
+    if git clone --depth 1 --branch "$MOODLE_BRANCH" \
+        --config http.postBuffer=524288000 \
+        https://github.com/moodle/moodle.git "$DEST_FOLDER" 2>&1; then
+      echo "Moodle core downloaded successfully."
+      return 0
+    fi
+    echo "  -> [WARN] Clone failed (attempt $attempt). Retrying after a short delay..."
+    sleep $((attempt * 5))
+  done
+  echo "Error: Failed to clone Moodle core after 5 attempts."
+  exit 1
+}
+
+clone_moodle_core
 
 # 6. Clone all plugins
 if [ "$PLUGINS_COUNT" -gt 0 ]; then
