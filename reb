@@ -270,13 +270,6 @@ EOF2"
     # so fix ownership of the moodle_app volume to avoid "Permission denied".
     docker compose exec -T moodle_php chown -R www-data:www-data /var/www/html/moodle_app
 
-    # Patch moove theme dependency to match actual boost version in this Moodle
-    ACTUAL_BOOST_VERSION=$(docker exec moodle_php php -r "include '/var/www/html/moodle_app/public/theme/boost/version.php'; echo \$version;" 2>/dev/null)
-    if [ -n "$ACTUAL_BOOST_VERSION" ]; then
-        docker exec moodle_php bash -c "sed -i \"s/'theme_boost' => [0-9]*/'theme_boost' => $ACTUAL_BOOST_VERSION/\" /var/www/html/moodle_app/public/theme/moove/version.php 2>/dev/null || true"
-        docker exec moodle_php bash -c "sed -i \"s/'theme_boost' => [0-9]*/'theme_boost' => $ACTUAL_BOOST_VERSION/\" /var/www/html/moodle_app/theme/moove/version.php 2>/dev/null || true"
-    fi
-
     # Run upgrade to register all plugins in the database
     log_info "Running Moodle upgrade..."
     docker compose exec -T moodle_php php /var/www/html/moodle_app/admin/cli/upgrade.php --non-interactive
@@ -285,13 +278,17 @@ EOF2"
     log_info "Applying REB customizations..."
     docker compose exec -T moodle_php php /var/www/html/moodle_app/customize_moodle.php
 
+    # --- Ensure boost theme is present ---
+    log_info "Ensuring boost theme is present..."
+    docker exec moodle_php bash -c "cp -r /var/www/html/moodle_app/theme/boost /var/www/html/moodle_app/public/theme/ 2>/dev/null || true"
+
     # --- Install and patch moove theme ---
     log_info "Installing and patching moove theme..."
 
     # Clone the theme if missing
     docker exec moodle_php bash -c "cd /var/www/html/moodle_app/public/theme && [ ! -d moove ] && git clone https://github.com/willianmano/moodle-theme_moove.git moove || true"
 
-    # Patch dependency
+    # Patch dependency to match actual boost version
     ACTUAL_BOOST=$(docker exec moodle_php php -r "include '/var/www/html/moodle_app/public/theme/boost/version.php'; echo \$version;" 2>/dev/null)
     if [ -n "$ACTUAL_BOOST" ]; then
         docker exec moodle_php sed -i "s/'theme_boost' => [0-9]*/'theme_boost' => $ACTUAL_BOOST/" /var/www/html/moodle_app/public/theme/moove/version.php 2>/dev/null || true
