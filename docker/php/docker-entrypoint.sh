@@ -50,6 +50,20 @@ echo "Setting permissions for moodledata..."
 chown -R www-data:www-data /var/www/moodledata
 chmod -R 0777 /var/www/moodledata
 
+# Ensure the standard Moodle subdirectories exist and are writable by www-data.
+# Moodle performs a write test on $CFG->dataroot, so pre-create and verify.
+for sub in cache localcache temp session; do
+    mkdir -p "/var/www/moodledata/$sub"
+    chown -R www-data:www-data "/var/www/moodledata/$sub"
+    chmod -R 0777 "/var/www/moodledata/$sub"
+done
+
+# Verify dataroot is actually writable by the web server user (www-data).
+if ! su www-data -s /bin/bash -c "test -w /var/www/moodledata && touch /var/www/moodledata/.write_test && rm -f /var/www/moodledata/.write_test"; then
+    echo "WARNING: dataroot /var/www/moodledata is not writable by www-data; attempting fallback chmod"
+    chmod -R 0777 /var/www/moodledata
+fi
+
 # Set proper permissions for moodle_app (always a named volume in local mode)
 if [ -d "/var/www/html/moodle_app" ]; then
     echo "Setting permissions for moodle_app..."

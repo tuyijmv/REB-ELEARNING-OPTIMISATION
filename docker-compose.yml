@@ -29,7 +29,7 @@ services:
     volumes:
       - moodle_app:/var/www/html/moodle_app
       - ./config.php.docker:/var/www/html/config.php.docker:ro
-      - ./moodledata:/var/www/moodledata
+      - moodledata:/var/www/moodledata
     networks:
       - moodle_network
     depends_on:
@@ -77,7 +77,7 @@ services:
       NGINX_PORT: ${MOODLE_PORT:-8080}
     volumes:
       - moodle_app:/var/www/html/moodle_app:ro
-      - ./moodledata:/var/www/moodledata
+      - moodledata:/var/www/moodledata
     networks:
       - moodle_network
     depends_on:
@@ -131,3 +131,4 @@ volumes:
   minio_data:
   redis_data:
   moodle_app:
+  moodledata:
