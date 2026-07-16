@@ -285,6 +285,24 @@ EOF2"
     log_info "Applying REB customizations..."
     docker compose exec -T moodle_php php /var/www/html/moodle_app/customize_moodle.php
 
+    # --- Install and patch moove theme ---
+    log_info "Installing and patching moove theme..."
+
+    # Clone the theme if missing
+    docker exec moodle_php bash -c "cd /var/www/html/moodle_app/public/theme && [ ! -d moove ] && git clone https://github.com/willianmano/moodle-theme_moove.git moove || true"
+
+    # Patch dependency
+    ACTUAL_BOOST=$(docker exec moodle_php php -r "include '/var/www/html/moodle_app/public/theme/boost/version.php'; echo \$version;" 2>/dev/null)
+    if [ -n "$ACTUAL_BOOST" ]; then
+        docker exec moodle_php sed -i "s/'theme_boost' => [0-9]*/'theme_boost' => $ACTUAL_BOOST/" /var/www/html/moodle_app/public/theme/moove/version.php 2>/dev/null || true
+    fi
+
+    # Install the theme via upgrade
+    docker exec moodle_php php /var/www/html/moodle_app/admin/cli/upgrade.php --non-interactive --allow-unstable 2>/dev/null || true
+
+    # Purge caches
+    docker exec moodle_php php /var/www/html/moodle_app/admin/cli/purge_caches.php 2>/dev/null || true
+
     log_success "=============================================="
     log_success "REB E-Learning Optimisation is ready!"
     log_success "=============================================="
