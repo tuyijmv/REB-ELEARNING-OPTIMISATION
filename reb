@@ -302,13 +302,48 @@ EOF2"
     # --- Install and patch moove theme ---
     log_info "Installing and patching moove theme..."
 
-    # Clone the theme if missing (matching elearning: public/theme/moove)
-    docker exec moodle_php bash -c "cd /var/www/html/moodle_app/public/theme && [ ! -d moove ] && git clone https://github.com/willianmano/moodle-theme_moove.git moove || true"
+    # Clone moove into public/theme/moove (matching elearning). Moove uses git
+    # submodules, so clone recursively. Retry on transient network failures and
+    # remove any half-cloned (".git"-only) directory so a broken checkout never
+    # reaches Moodle (which would fail with "Not in the Plugins directory:
+    # theme_boost"). The actual boost version is already present in public/theme.
+    docker exec moodle_php bash -c '
+        set -e
+        CDIR=/var/www/html/moodle_app/public/theme
+        MOOVE_REPO=https://github.com/willianmano/moodle-theme_moove.git
+        clone_moove() {
+            for attempt in 1 2 3 4 5; do
+                echo "  -> moove clone attempt $attempt/5..."
+                rm -rf "$CDIR/moove"
+                if git clone --depth 1 --recursive "$MOOVE_REPO" "$CDIR/moove" 2>&1; then
+                    return 0
+                fi
+                echo "  -> [WARN] moove clone failed (attempt $attempt). Retrying..."
+                sleep $((attempt * 5))
+            done
+            return 1
+        }
+        # Only (re)clone if moove is missing or incomplete (no version.php).
+        if [ ! -f "$CDIR/moove/version.php" ]; then
+            clone_moove || echo "ERROR: failed to clone moove theme"
+            # Safety: if the working tree is incomplete, drop the broken dir.
+            if [ ! -f "$CDIR/moove/version.php" ]; then
+                echo "  -> Removing incomplete moove checkout."
+                rm -rf "$CDIR/moove"
+            fi
+        else
+            echo "  -> moove already present, skipping clone."
+        fi
+    '
 
-    # Patch dependency to match actual boost version
-    ACTUAL_BOOST=$(docker exec moodle_php php -r "include '/var/www/html/moodle_app/public/theme/boost/version.php'; echo \$version;" 2>/dev/null)
-    if [ -n "$ACTUAL_BOOST" ]; then
-        docker exec moodle_php sed -i "s/'theme_boost' => [0-9]*/'theme_boost' => $ACTUAL_BOOST/" /var/www/html/moodle_app/public/theme/moove/version.php 2>/dev/null || true
+    # Patch dependency to match actual boost version (only if moove is valid)
+    if docker exec moodle_php test -f /var/www/html/moodle_app/public/theme/moove/version.php 2>/dev/null; then
+        ACTUAL_BOOST=$(docker exec moodle_php php -r "include '/var/www/html/moodle_app/public/theme/boost/version.php'; echo \$version;" 2>/dev/null)
+        if [ -n "$ACTUAL_BOOST" ]; then
+            docker exec moodle_php sed -i "s/'theme_boost' => [0-9]*/'theme_boost' => $ACTUAL_BOOST/" /var/www/html/moodle_app/public/theme/moove/version.php 2>/dev/null || true
+        fi
+    else
+        log_warn "moove theme not installed (version.php missing). Skipping moove setup; boost remains the active theme."
     fi
 
     # Install the theme via upgrade
