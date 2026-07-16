@@ -270,6 +270,13 @@ EOF2"
     # so fix ownership of the moodle_app volume to avoid "Permission denied".
     docker compose exec -T moodle_php chown -R www-data:www-data /var/www/html/moodle_app
 
+    # Patch moove theme dependency to match actual boost version in this Moodle
+    ACTUAL_BOOST_VERSION=$(docker exec moodle_php php -r "include '/var/www/html/moodle_app/public/theme/boost/version.php'; echo \$version;" 2>/dev/null)
+    if [ -n "$ACTUAL_BOOST_VERSION" ]; then
+        docker exec moodle_php bash -c "sed -i \"s/'theme_boost' => [0-9]*/'theme_boost' => $ACTUAL_BOOST_VERSION/\" /var/www/html/moodle_app/public/theme/moove/version.php 2>/dev/null || true"
+        docker exec moodle_php bash -c "sed -i \"s/'theme_boost' => [0-9]*/'theme_boost' => $ACTUAL_BOOST_VERSION/\" /var/www/html/moodle_app/theme/moove/version.php 2>/dev/null || true"
+    fi
+
     # Run upgrade to register all plugins in the database
     log_info "Running Moodle upgrade..."
     docker compose exec -T moodle_php php /var/www/html/moodle_app/admin/cli/upgrade.php --non-interactive
