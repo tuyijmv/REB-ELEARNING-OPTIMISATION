@@ -279,13 +279,25 @@ EOF2"
     docker compose exec -T moodle_php php /var/www/html/moodle_app/customize_moodle.php
 
     # --- Ensure boost theme is present ---
-    log_info "Ensuring boost theme is present..."
-    docker exec moodle_php bash -c "cp -r /var/www/html/moodle_app/theme/boost /var/www/html/moodle_app/public/theme/ 2>/dev/null || true"
+    # In elearning (MOODLE_501_STABLE) the core themes ship under
+    # public/theme/ (e.g. public/theme/boost), NOT the legacy root theme/.
+    # We replicate that working approach: make sure public/theme/boost exists
+    # by copying from the legacy root theme/ when present, and otherwise rely
+    # on the Moodle clone which already places boost in public/theme/.
+    log_info "Ensuring boost theme is present in public/theme/..."
+    docker exec moodle_php bash -c "
+        if [ -d /var/www/html/moodle_app/theme/boost ]; then
+            cp -r /var/www/html/moodle_app/theme/boost /var/www/html/moodle_app/public/theme/
+        fi
+        if [ ! -d /var/www/html/moodle_app/public/theme/boost ]; then
+            echo 'WARNING: boost theme missing at public/theme/boost'
+        fi
+    " || true
 
     # --- Install and patch moove theme ---
     log_info "Installing and patching moove theme..."
 
-    # Clone the theme if missing
+    # Clone the theme if missing (matching elearning: public/theme/moove)
     docker exec moodle_php bash -c "cd /var/www/html/moodle_app/public/theme && [ ! -d moove ] && git clone https://github.com/willianmano/moodle-theme_moove.git moove || true"
 
     # Patch dependency to match actual boost version
