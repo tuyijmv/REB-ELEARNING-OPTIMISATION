@@ -188,7 +188,8 @@ setup_local() {
     HOST_PORT=$(read_env_var MOODLE_PORT)
     
     # Start Docker Compose
-    log_info "Starting Docker Compose services..."
+    log_info "Building and starting Docker Compose services..."
+    docker compose build
     docker compose up -d
     
     # Wait for MySQL to be healthy
