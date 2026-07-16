@@ -252,8 +252,6 @@ setup_local() {
 
     fi
 
-    docker compose exec -T moodle_php php /var/www/html/moodle_app/admin/cli/cfg.php --name=theme --set=moove 2>/dev/null || true
-    
     # Append reverse proxy settings to config.php
     if docker compose exec -T moodle_php test -f /var/www/html/moodle_app/config.php 2>/dev/null; then
         log_info "Updating config.php proxy settings..."
@@ -277,85 +275,18 @@ EOF2"
 
     # Run upgrade to register all plugins in the database
     log_info "Running Moodle upgrade..."
-    docker compose exec -T moodle_php php /var/www/html/moodle_app/admin/cli/upgrade.php --non-interactive
+    docker compose exec -T moodle_php php /var/www/html/moodle_app/admin/cli/upgrade.php --non-interactive --allow-unstable
+
+    # Set moove as the default theme and purge caches
+    log_info "Setting moove as default theme..."
+    docker compose exec -T moodle_php php /var/www/html/moodle_app/admin/cli/cfg.php --name=theme --set=moove
+
+    log_info "Purging caches..."
+    docker compose exec -T moodle_php php /var/www/html/moodle_app/admin/cli/purge_caches.php
 
     # Apply REB branding customizations
     log_info "Applying REB customizations..."
     docker compose exec -T moodle_php php /var/www/html/moodle_app/customize_moodle.php
-
-    # --- Ensure boost theme is present in the root theme/ directory ---
-    # Moodle 5.x ships core themes under public/theme/. The moove child theme
-    # (and Moodle's plugin manager) expect boost at the ROOT theme/boost path,
-    # matching the official install layout used by the elearning project. If it
-    # is missing there, copy it from public/theme/boost (Moodle core).
-    log_info "Ensuring boost theme is present at theme/boost..."
-    docker exec moodle_php bash -c "
-        if [ ! -d /var/www/html/moodle_app/theme/boost ]; then
-            if [ -d /var/www/html/moodle_app/public/theme/boost ]; then
-                cp -r /var/www/html/moodle_app/public/theme/boost /var/www/html/moodle_app/theme/
-                echo 'Copied boost from public/theme/boost to theme/boost.'
-            else
-                echo 'WARNING: boost theme missing (neither theme/boost nor public/theme/boost found).'
-            fi
-        fi
-        chown -R www-data:www-data /var/www/html/moodle_app/theme/boost 2>/dev/null || true
-    " || true
-
-    # --- Install and patch moove theme (root theme/ directory) ---
-    log_info "Installing and patching moove theme..."
-
-    # Step 1-4 (per official method): remove any broken install, clone moove
-    # into the ROOT theme/ directory, and fix ownership. Retry on transient
-    # network failures and drop any half-cloned (".git"-only) checkout so a
-    # broken theme never reaches Moodle's plugin manager.
-    docker exec moodle_php bash -c '
-        set -e
-        TDIR=/var/www/html/moodle_app/theme
-        MOOVE_REPO=https://github.com/willianmano/moodle-theme_moove.git
-        # Remove any previous/broken moove installation.
-        rm -rf "$TDIR/moove"
-        clone_moove() {
-            for attempt in 1 2 3 4 5; do
-                echo "  -> moove clone attempt $attempt/5..."
-                rm -rf "$TDIR/moove"
-                if git clone --depth 1 "$MOOVE_REPO" "$TDIR/moove" 2>&1; then
-                    return 0
-                fi
-                echo "  -> [WARN] moove clone failed (attempt $attempt). Retrying..."
-                sleep $((attempt * 5))
-            done
-            return 1
-        }
-        if clone_moove; then
-            chown -R www-data:www-data "$TDIR/moove"
-            echo "  -> moove cloned to $TDIR/moove"
-        else
-            echo "ERROR: failed to clone moove theme"
-        fi
-    '
-
-    # Step 5: patch the boost dependency version to match the installed boost.
-    if docker exec moodle_php test -f /var/www/html/moodle_app/theme/moove/version.php 2>/dev/null; then
-        ACTUAL_BOOST=$(docker exec moodle_php php -r "include '/var/www/html/moodle_app/theme/boost/version.php'; echo \$version;" 2>/dev/null)
-        if [ -n "$ACTUAL_BOOST" ]; then
-            docker exec moodle_php sed -i "s/'theme_boost' => [0-9]*/'theme_boost' => $ACTUAL_BOOST/" /var/www/html/moodle_app/theme/moove/version.php 2>/dev/null || true
-            log_info "Patched moove boost dependency to version $ACTUAL_BOOST."
-        else
-            log_warn "Could not read boost version; leaving moove dependency as-is."
-        fi
-    else
-        log_warn "moove theme not installed (version.php missing). Skipping moove setup; boost remains the active theme."
-    fi
-
-    # Step 6: run the upgrade to register/install the theme, then purge caches.
-    log_info "Running Moodle upgrade to install moove..."
-    docker exec moodle_php php /var/www/html/moodle_app/admin/cli/upgrade.php --non-interactive --allow-unstable 2>/dev/null || true
-    docker exec moodle_php php /var/www/html/moodle_app/admin/cli/purge_caches.php 2>/dev/null || true
-
-    # Step 7: set moove as the default theme (only if it was installed).
-    if docker exec moodle_php test -d /var/www/html/moodle_app/theme/moove 2>/dev/null; then
-        docker exec moodle_php php /var/www/html/moodle_app/admin/cli/cfg.php --name=theme --set=moove 2>/dev/null || true
-    fi
 
     log_success "=============================================="
     log_success "REB E-Learning Optimisation is ready!"

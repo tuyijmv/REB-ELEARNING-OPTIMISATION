@@ -159,19 +159,6 @@ if [ "$PLUGINS_COUNT" -gt 0 ]; then
       PLUGIN_BRANCH="MOODLE_501_STABLE"
     fi
 
-    # Normalise destination: ensure it lives under the Moodle 5.1+ web root.
-    case "$PLUGIN_DEST" in
-      public/*) ;;
-      *) PLUGIN_DEST="public/$PLUGIN_DEST" ;;
-    esac
-
-    # De-duplicate by normalised destination.
-    if grep -qxF "$PLUGIN_DEST" /tmp/reb_plugin_destinations 2>/dev/null; then
-      echo "  -> [SKIP] Plugin '$PLUGIN_NAME' (destination '$PLUGIN_DEST' already installed)."
-      continue
-    fi
-    echo "$PLUGIN_DEST" >> /tmp/reb_plugin_destinations
-
     echo "  -> Installing plugin: $PLUGIN_NAME"
     echo "     - Repository: $PLUGIN_REPO"
     echo "     - Branch: $PLUGIN_BRANCH"

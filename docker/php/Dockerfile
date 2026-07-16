@@ -62,8 +62,8 @@ RUN chmod +x build.sh
 # Run build script to clone Moodle and plugins
 RUN ./build.sh
 
-# Verify moove theme was cloned successfully
-RUN test -d /var/www/html/moodle_app/theme/moove || test -d /var/www/html/moodle_app/public/theme/moove || echo "Warning: moove theme not found"
+# Verify moove theme is present (installed during build by build.sh from config.json)
+RUN test -d /var/www/html/moodle_app/theme/moove || echo "Note: moove theme should be installed during build via config.json destination: theme/moove"
 
 # Ship the customization script inside moodle_app so it is included when the
 # entrypoint copies the staged app into the named volume on first run.
