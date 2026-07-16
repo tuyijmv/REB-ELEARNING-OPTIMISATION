@@ -4,9 +4,7 @@
     {
       "name": "theme_moove",
       "repository": "https://github.com/willianmano/moodle-theme_moove.git",
-      "version": "MOODLE_501_STABLE",
-      "branch": "MOODLE_501_STABLE",
-      "destination": "public/theme/moove"
+      "destination": "theme/moove"
     },
     {
       "name": "coursefields",
