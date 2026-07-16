@@ -237,7 +237,6 @@ setup_local() {
             --adminuser=admin \
             --adminpass="admin@123" \
             --adminemail="admin@example.com" \
-            --theme=moove \
             --non-interactive \
             --agree-license
         
