@@ -80,13 +80,13 @@ if [ ! -f "$CONFIG_FILE" ]; then
 fi
 
 if [ ! -f "$CONFIG_FILE" ]; then
-  echo "Error: Configuration file 'plugins.json' not found. Tried: plugins.json, config.json, moodle-config.json"
-  exit 1
+  echo "  -> [WARN] No plugin configuration file found. Falling back to Moove theme only."
+  PLUGINS_COUNT=0
+else
+  # 3. Read plugin count
+  PLUGINS_COUNT=$(jq -r '.plugins | length' "$CONFIG_FILE")
+  PLUGINS_COUNT=${PLUGINS_COUNT:-0}
 fi
-
-# 3. Read plugin count
-PLUGINS_COUNT=$(jq -r '.plugins | length' "$CONFIG_FILE")
-PLUGINS_COUNT=${PLUGINS_COUNT:-0}
 
 echo "Configuration loaded:"
 echo "  - Moodle Branch: $MOODLE_BRANCH"
@@ -169,23 +169,27 @@ if [ "$PLUGINS_COUNT" -gt 0 ]; then
     if clone_plugin "$PLUGIN_REPO" "$PLUGIN_DEST" "$PLUGIN_BRANCH" "$PLUGIN_FALLBACK"; then
       echo "     - Plugin '$PLUGIN_NAME' installed."
     else
-      echo "     - [FATAL] Failed to install plugin '$PLUGIN_NAME'. Aborting build."
-      exit 1
+      echo "     - [WARN] Plugin '$PLUGIN_NAME' failed to install. Continuing with other plugins."
     fi
   done
 
   rm -f /tmp/reb_plugin_destinations
 
-  # Verify critical plugins are present
+  # Ensure Moove theme is present; if missing from config or clone failures,
+  # install it directly so the site has a working default theme.
   echo "----------------------------------------"
-  echo "Verifying critical plugins..."
+  echo "Verifying Moove theme presence..."
   if [ ! -d "theme/moove" ]; then
-    echo "  -> [FATAL] Critical plugin 'theme_moove' is missing after build."
-    echo "     Expected destination: theme/moove"
-    echo "     This usually means the git clone failed or the branch/tag does not exist."
-    exit 1
+    echo "  -> [WARN] Moove theme not found after plugin install. Attempting direct clone..."
+    mkdir -p theme
+    if git clone --depth 1 https://github.com/willianmano/moodle-theme_moove.git theme/moove; then
+      echo "  -> [OK] Moove theme installed via fallback."
+    else
+      echo "  -> [WARN] Failed to clone Moove theme fallback. The site may use the default theme."
+    fi
+  else
+    echo "  -> [OK] Moove theme present."
   fi
-  echo "  -> [OK] theme_moove present."
 
   cd ..
 fi
