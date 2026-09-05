@@ -121,7 +121,7 @@ Key variables in `.env`:
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `MOODLE_PORT` | `8080` | Host port for Nginx |
-| `DB_TYPE` | `mysql` | Database driver |
+| `DB_TYPE` | `mysqli` | Database driver |
 | `DB_HOST` | `mysql` | Database hostname |
 | `DB_NAME` | `moodle` | Database name |
 | `DB_USER` | `moodleuser` | Database user |
