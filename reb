@@ -169,6 +169,12 @@ setup_local() {
     ensure_env_var "DB_ROOT_PASSWORD" "rootpass"
     ensure_env_var "DB_PORT" "3306"
 
+    # Migrate legacy DB_TYPE=mysql to mysqli for Moodle CLI compatibility
+    if [ -f ".env" ] && grep -q '^DB_TYPE=mysql' ".env"; then
+        log_info "Migrating legacy DB_TYPE=mysql to mysqli in .env..."
+        sed -i 's/^DB_TYPE=mysql$/DB_TYPE=mysqli/' ".env"
+    fi
+
     # Select a free host port only if one is not already configured
     if [ -z "$(read_env_var MOODLE_PORT)" ]; then
         HOST_PORT=$(find_free_port)
