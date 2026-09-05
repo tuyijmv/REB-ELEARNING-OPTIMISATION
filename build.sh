@@ -33,14 +33,14 @@ clone_plugin() {
   for attempt in 1 2; do
     if [ "$attempt" -eq 1 ]; then
       echo "     - Cloning branch/tag: $branch"
-      if git clone --depth 1 --branch "$branch" --recursive "$repo" "$dest" 2>/dev/null; then
+      if git clone --depth 1 --branch "$branch" --recursive "$repo" "$dest"; then
         return 0
       fi
       echo "     - [WARN] Branch/tag '$branch' not found, trying fallback."
     else
       if [ -n "$fallback" ]; then
         echo "     - Cloning fallback branch/tag: $fallback"
-        if git clone --depth 1 --branch "$fallback" --recursive "$repo" "$dest" 2>/dev/null; then
+        if git clone --depth 1 --branch "$fallback" --recursive "$repo" "$dest"; then
           return 0
         fi
         echo "     - [ERROR] Failed to clone $repo with branch '$branch' or fallback '$fallback'."
@@ -168,10 +168,25 @@ if [ "$PLUGINS_COUNT" -gt 0 ]; then
     mkdir -p "$(dirname "$PLUGIN_DEST")"
     if clone_plugin "$PLUGIN_REPO" "$PLUGIN_DEST" "$PLUGIN_BRANCH" "$PLUGIN_FALLBACK"; then
       echo "     - Plugin '$PLUGIN_NAME' installed."
+    else
+      echo "     - [FATAL] Failed to install plugin '$PLUGIN_NAME'. Aborting build."
+      exit 1
     fi
   done
 
   rm -f /tmp/reb_plugin_destinations
+
+  # Verify critical plugins are present
+  echo "----------------------------------------"
+  echo "Verifying critical plugins..."
+  if [ ! -d "theme/moove" ]; then
+    echo "  -> [FATAL] Critical plugin 'theme_moove' is missing after build."
+    echo "     Expected destination: theme/moove"
+    echo "     This usually means the git clone failed or the branch/tag does not exist."
+    exit 1
+  fi
+  echo "  -> [OK] theme_moove present."
+
   cd ..
 fi
 

@@ -63,7 +63,7 @@ RUN chmod +x build.sh
 RUN ./build.sh
 
 # Verify moove theme is present (installed during build by build.sh from config.json)
-RUN test -d /var/www/html/moodle_app/theme/moove || echo "Note: moove theme should be installed during build via config.json destination: theme/moove"
+RUN test -d /var/www/html/moodle_app/theme/moove || (echo "ERROR: Moove theme missing after build.sh" && exit 1)
 
 # Ship the customization script inside moodle_app so it is included when the
 # entrypoint copies the staged app into the named volume on first run.

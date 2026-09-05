@@ -289,6 +289,17 @@ EOF2"
     log_info "Running Moodle upgrade..."
     docker compose exec -T moodle_php php /var/www/html/moodle_app/admin/cli/upgrade.php --non-interactive --allow-unstable
 
+    # Ensure Moove theme is present; if missing from the image, install it at runtime
+    log_info "Verifying Moove theme presence..."
+    if ! docker compose exec -T moodle_php test -d /var/www/html/moodle_app/theme/moove; then
+        log_warn "Moove theme not found in image. Attempting runtime install..."
+        docker compose exec -T moodle_php bash -c '\
+            cd /var/www/html/moodle_app && \
+            git clone --depth 1 --branch main https://github.com/willianmano/moodle-theme_moove.git theme/moove || \
+            git clone --depth 1 https://github.com/willianmano/moodle-theme_moove.git theme/moove \
+        '
+    fi
+
     # Set moove as the default theme and purge caches
     log_info "Setting moove as default theme..."
     docker compose exec -T moodle_php php /var/www/html/moodle_app/admin/cli/cfg.php --name=theme --set=moove
