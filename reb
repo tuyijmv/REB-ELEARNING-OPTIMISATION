@@ -175,6 +175,12 @@ setup_local() {
         sed -i 's/^DB_TYPE=mysql$/DB_TYPE=mysqli/' ".env"
     fi
 
+    # Migrate legacy DB_HOST=mysql to the actual compose service name
+    if [ -f ".env" ] && grep -q '^DB_HOST=mysql' ".env"; then
+        log_info "Migrating legacy DB_HOST=mysql to moodle_mysql in .env..."
+        sed -i 's/^DB_HOST=mysql$/DB_HOST=moodle_mysql/' ".env"
+    fi
+
     # Select a free host port only if one is not already configured
     if [ -z "$(read_env_var MOODLE_PORT)" ]; then
         HOST_PORT=$(find_free_port)
