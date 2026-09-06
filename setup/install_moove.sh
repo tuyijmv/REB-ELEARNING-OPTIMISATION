@@ -1,28 +1,24 @@
 #!/bin/bash
 set -e
 
-MOODLE_DIR=""
+MOODLE_DIR="/var/www/html/moodle_app"
 THEME_NAME="moove"
 THEME_REPO="https://github.com/willianmano/moodle-theme_moove.git"
 
 echo "=== Moove Theme Installer ==="
 echo ""
 
-# Detect Moodle root: Moodle 5.1+ uses /public/version.php, older uses /version.php
-if [ -f "/var/www/html/moodle_app/public/version.php" ]; then
-    MOODLE_DIR="/var/www/html/moodle_app/public"
-elif [ -f "/var/www/html/moodle_app/version.php" ]; then
-    MOODLE_DIR="/var/www/html/moodle_app"
-else
-    echo "[ERROR] Moodle not found at /var/www/html/moodle_app or /var/www/html/moodle_app/public"
+# Detect Moodle installation by checking both possible version.php locations
+if [ ! -f "$MOODLE_DIR/version.php" ] && [ ! -f "$MOODLE_DIR/public/version.php" ]; then
+    echo "[ERROR] Moodle not found at $MOODLE_DIR"
     exit 1
 fi
 
 echo "[INFO] Detected Moodle directory: $MOODLE_DIR"
 
 # Theme destination paths
-THEME_DEST="/var/www/html/moodle_app/theme/$THEME_NAME"
-THEME_PUBLIC_DEST="/var/www/html/moodle_app/public/theme/$THEME_NAME"
+THEME_DEST="$MOODLE_DIR/theme/$THEME_NAME"
+THEME_PUBLIC_DEST="$MOODLE_DIR/public/theme/$THEME_NAME"
 UPGRADE_SCRIPT="$MOODLE_DIR/admin/cli/upgrade.php"
 CFG_SCRIPT="$MOODLE_DIR/admin/cli/cfg.php"
 PURGE_SCRIPT="$MOODLE_DIR/admin/cli/purge_caches.php"
@@ -32,7 +28,7 @@ if [ -d "$THEME_DEST" ] || [ -d "$THEME_PUBLIC_DEST" ]; then
     echo "[OK] Moove theme already present."
 else
     echo "[INFO] Moove theme not found. Cloning from $THEME_REPO ..."
-    mkdir -p /var/www/html/moodle_app/theme
+    mkdir -p "$MOODLE_DIR/theme"
     if git clone --depth 1 https://github.com/willianmano/moodle-theme_moove.git "$THEME_DEST"; then
         echo "[OK] Moove theme cloned to $THEME_DEST"
     else
