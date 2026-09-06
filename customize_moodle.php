@@ -123,6 +123,30 @@ foreach ($moove_settings as $key => $value) {
     echo "  [OK] theme_moove/$key = $value\n";
 }
 
+$frontpage_settings = [
+    'displaymarketingbox'     => '1',
+    'marketingsectionheading' => 'Why Choose REB E-Learning?',
+    'marketingsectioncontent' => 'Discover a modern, accessible, and engaging learning experience built for students, teachers, and parents across Rwanda.',
+    'marketing1heading'       => 'Quality Education',
+    'marketing1content'       => 'Access interactive courses aligned with the national curriculum, designed to foster critical thinking and digital skills.',
+    'marketing2heading'       => 'Expert Teachers',
+    'marketing2content'       => 'Learn from certified educators with real-world experience, supported by continuous professional development.',
+    'marketing3heading'       => 'Flexible Learning',
+    'marketing3content'       => 'Study at your own pace with 24/7 access to lessons, assessments, and multimedia resources.',
+    'marketing4heading'       => 'Community & Support',
+    'marketing4content'       => 'Join a vibrant learning community with personalised support, mentorship, and collaborative tools.',
+    'numbersfrontpage'        => '1',
+    'numbersfrontpagecontent' => '<h2>Join thousands of learners across Rwanda</h2>
+<p>REB E-Learning provides scalable, reliable, and modern digital learning for schools nationwide.</p>',
+    'numbersusers'            => 'Active learners on the platform',
+    'numberscourses'          => 'Courses available across all levels',
+];
+
+foreach ($frontpage_settings as $key => $value) {
+    set_config($key, $value, 'theme_moove');
+    echo "  [OK] theme_moove/$key = $value\n";
+}
+
 $custom_scss = '
 /* ===== REB E-Learning Custom Styles ===== */
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
@@ -252,6 +276,80 @@ body {
     bottom: 0;
     left: 0;
     right: 0;
+}
+
+/* ===== Frontpage Modern Enhancements ===== */
+.frontpage-section .card {
+    border-radius: 20px !important;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.08) !important;
+    transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+    border: none !important;
+}
+.frontpage-section .card:hover {
+    transform: translateY(-6px) !important;
+    box-shadow: 0 16px 40px rgba(0,0,0,0.12) !important;
+}
+
+.marketing-section .card {
+    border-radius: 20px !important;
+    overflow: hidden;
+    border: none !important;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.08) !important;
+    transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+}
+.marketing-section .card:hover {
+    transform: translateY(-6px) !important;
+    box-shadow: 0 16px 40px rgba(0,0,0,0.12) !important;
+}
+
+.marketing-section .card-body {
+    padding: 2rem !important;
+}
+
+.numbers-section {
+    background: linear-gradient(135deg, rgba(0,160,220,0.08), rgba(0,166,81,0.08)) !important;
+    border-radius: 24px !important;
+    padding: 3rem 2rem !important;
+}
+
+.frontpage-hero {
+    border-radius: 0 0 40px 40px !important;
+    overflow: hidden;
+    position: relative;
+}
+
+#page-site-index .hero-image,
+.frontpage-hero .hero-image {
+    border-radius: 0 0 40px 40px !important;
+}
+
+.block-region .card-block {
+    border-radius: 16px !important;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.06) !important;
+    transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+}
+.block-region .card-block:hover {
+    transform: translateY(-4px) !important;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1) !important;
+}
+
+.slider-carousel .carousel-item img {
+    border-radius: 0 0 30px 30px !important;
+    object-fit: cover;
+    height: 420px;
+}
+
+#page-site-index h1,
+#page-site-index h2,
+#page-site-index h3,
+#page-site-index h4 {
+    font-weight: 700 !important;
+    letter-spacing: -0.02em !important;
+}
+
+#page-site-index p {
+    line-height: 1.7 !important;
+    color: #4a4a4a !important;
 }
 ';
 
