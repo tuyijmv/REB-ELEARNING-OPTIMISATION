@@ -215,29 +215,36 @@ a {
     height: 420px !important;
 }
 #mooveslideshow .carousel-caption {
-    background: linear-gradient(135deg, rgba(0,160,220,0.88), rgba(0,166,81,0.78)) !important;
-    border-radius: 20px !important;
-    padding: 2rem !important;
-    text-shadow: 0 2px 8px rgba(0,0,0,0.35) !important;
-    bottom: 2rem !important;
+    position: absolute !important;
+    top: 50% !important;
     left: 50% !important;
-    transform: translateX(-50%) !important;
+    transform: translate(-50%, -50%) !important;
+    bottom: auto !important;
+    background: rgba(0, 0, 0, 0.55) !important;
+    border-radius: 20px !important;
+    padding: 2.5rem 3rem !important;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.8) !important;
+    z-index: 20 !important;
     width: auto !important;
     max-width: 90% !important;
+    text-align: center !important;
 }
 #mooveslideshow .carousel-caption h5 {
-    color: white !important;
-    font-size: 2.2rem !important;
+    color: #ffffff !important;
+    font-size: 2.8rem !important;
     font-weight: 800 !important;
-    margin-bottom: 0.5rem !important;
+    margin-bottom: 0.75rem !important;
+    text-shadow: 0 4px 16px rgba(0,0,0,0.9) !important;
 }
 #mooveslideshow .carousel-caption .caption {
-    color: rgba(255,255,255,0.95) !important;
-    font-size: 1.2rem !important;
-    line-height: 1.6 !important;
+    color: #ffffff !important;
+    font-size: 1.3rem !important;
+    line-height: 1.7 !important;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.7) !important;
 }
 #mooveslideshow .carousel-indicators {
-    bottom: 1rem !important;
+    bottom: 1.5rem !important;
+    z-index: 30 !important;
 }
 
 /* ===== Marketing / Feature Section ===== */
