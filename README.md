@@ -1,6 +1,8 @@
 # REB E-Learning Optimisation
 
-A production-ready, fully automated Moodle 5.1 stack deployable on any fresh Ubuntu 22.04/24.04 VM via a single command, with built-in support for cloud auto-scaling (Terraform + Ansible).
+This repository is open source and can be used by anyone. The scripts and architecture below are provided as-is to help deploy a production-ready, fully automated Moodle 5.1 stack on any fresh Ubuntu 22.04/24.04 VM via a single command, with built-in support for cloud auto-scaling (Terraform + Ansible).
+
+Rwanda’s push for e-governance has rolled out huge digital platforms used by millions—platforms like the REB E-learning site, CAMIS, Irembo, and the MIFOTRA human resource portal. But these e-government platforms hit real challenges. The biggest headache? When too many people try to access the platform at the same time, things go sideways, or sometimes the whole system just goes down for a while. This study examines how e-governance frameworks manage those heavy spikes in user activity, especially in big digital education systems. It specifically focuses on the REB E-learning platform. The research explores strategies for high availability, managing multiple users at once, system resilience, and deploying infrastructure in a cost-effective way. This study proposed an improved concurrent-user management architecture. This architecture uses horizontal scaling, edge caching, tiered database replication, server-level optimizations like Nginx, Apache, MySQL, cloud resources, and distributed system techniques. This study provides practical and cost-effective strategies for e-governance platforms in resource-limited settings, with anticipated outcomes including low cost, increased scalability, improved system stability, and enhanced user experience compared to the current operational architecture of the REB E-learning platform.
 
 ## Architecture
 
@@ -46,6 +48,12 @@ A production-ready, fully automated Moodle 5.1 stack deployable on any fresh Ubu
 wget -qO reb https://raw.githubusercontent.com/tuyijmv/REB-ELEARNING-OPTIMISATION/main/reb && sudo bash reb --local
 ```
 
+### One-Line Cloud Deploy
+
+```bash
+wget -qO reb https://raw.githubusercontent.com/tuyijmv/REB-ELEARNING-OPTIMISATION/main/reb && sudo bash reb --cloud
+```
+
 ### What It Does
 
 1. Detects OS (Ubuntu 22.04/24.04)
@@ -66,6 +74,8 @@ wget -qO reb https://raw.githubusercontent.com/tuyijmv/REB-ELEARNING-OPTIMISATIO
 - **URL:** `http://localhost:<auto-port>` (e.g., `http://localhost:8080`)
 - **Username:** `admin`
 - **Password:** `admin@123`
+
+This repository is open source and can be used by anyone. Feel free to fork, modify, and deploy it for your own Moodle-based e-learning platform.
 
 ### Post-Install
 
