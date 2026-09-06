@@ -174,24 +174,22 @@ if [ "$PLUGINS_COUNT" -gt 0 ]; then
   done
 
   rm -f /tmp/reb_plugin_destinations
-
-  # Ensure Moove theme is present; if missing from config or clone failures,
-  # install it directly so the site has a working default theme.
-  echo "----------------------------------------"
-  echo "Verifying Moove theme presence..."
-  if [ ! -d "theme/moove" ]; then
-    echo "  -> [WARN] Moove theme not found after plugin install. Attempting direct clone..."
-    mkdir -p theme
-    if git clone --depth 1 https://github.com/willianmano/moodle-theme_moove.git theme/moove; then
-      echo "  -> [OK] Moove theme installed via fallback."
-    else
-      echo "  -> [WARN] Failed to clone Moove theme fallback. The site may use the default theme."
-    fi
-  else
-    echo "  -> [OK] Moove theme present."
-  fi
-
   cd ..
+fi
+
+# 7. Ensure Moove theme is always present
+echo "----------------------------------------"
+echo "Verifying Moove theme presence..."
+if [ ! -d "$DEST_FOLDER/theme/moove" ]; then
+    echo "  -> [WARN] Moove theme not found. Cloning directly..."
+    mkdir -p "$DEST_FOLDER/theme"
+    if git clone --depth 1 https://github.com/willianmano/moodle-theme_moove.git "$DEST_FOLDER/theme/moove"; then
+        echo "  -> [OK] Moove theme installed."
+    else
+        echo "  -> [WARN] Failed to clone Moove theme. The site may use the default theme."
+    fi
+else
+    echo "  -> [OK] Moove theme present."
 fi
 
 rm -f "$PLUGIN_MANIFEST" 2>/dev/null || true
