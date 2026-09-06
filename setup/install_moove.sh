@@ -4,7 +4,8 @@ set -e
 MOODLE_DIR="/var/www/html/moodle_app"
 THEME_NAME="moove"
 THEME_REPO="https://github.com/willianmano/moodle-theme_moove.git"
-THEME_ZIP_URL="https://github.com/willianmano/moodle-theme_moove/archive/refs/heads/main.zip"
+THEME_BRANCH="MOODLE_501_STABLE"
+THEME_ZIP_URL="https://github.com/willianmano/moodle-theme_moove/archive/refs/heads/MOODLE_501_STABLE.zip"
 
 echo "=== Moove Theme Installer ==="
 echo ""
@@ -24,14 +25,14 @@ BOOTSTHEME_PUBLIC_DEST="$MOODLE_DIR/public/theme/boost"
 if [ -d "$THEME_DEST" ] || [ -d "$THEME_PUBLIC_DEST" ]; then
     echo "[OK] Moove theme already present."
 else
-    echo "[INFO] Moove theme not found. Downloading from $THEME_REPO ..."
+    echo "[INFO] Moove theme not found. Downloading $THEME_BRANCH from $THEME_REPO ..."
     mkdir -p "$MOODLE_DIR/theme"
     if curl -fsSL "$THEME_ZIP_URL" -o /tmp/moove.zip && \
        unzip -q /tmp/moove.zip -d /tmp && \
-       mv /tmp/moodle-theme_moove-main "$THEME_DEST"; then
+       mv /tmp/moodle-theme_moove-MOODLE_501_STABLE "$THEME_DEST"; then
         echo "[OK] Moove theme downloaded and extracted to $THEME_DEST"
         rm -f /tmp/moove.zip
-        rm -rf /tmp/moodle-theme_moove-main
+        rm -rf /tmp/moodle-theme_moove-MOODLE_501_STABLE
     else
         echo "[ERROR] Failed to download or extract Moove theme."
         exit 1

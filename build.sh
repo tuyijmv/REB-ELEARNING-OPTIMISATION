@@ -181,9 +181,9 @@ fi
 echo "----------------------------------------"
 echo "Verifying Moove theme presence..."
 if [ ! -d "$DEST_FOLDER/theme/moove" ]; then
-    echo "  -> [WARN] Moove theme not found. Cloning directly..."
+    echo "  -> [WARN] Moove theme not found. Cloning MOODLE_501_STABLE..."
     mkdir -p "$DEST_FOLDER/theme"
-    if git clone --depth 1 https://github.com/willianmano/moodle-theme_moove.git "$DEST_FOLDER/theme/moove"; then
+    if git clone --depth 1 --branch MOODLE_501_STABLE https://github.com/willianmano/moodle-theme_moove.git "$DEST_FOLDER/theme/moove"; then
         echo "  -> [OK] Moove theme installed."
     else
         echo "  -> [WARN] Failed to clone Moove theme. The site may use the default theme."
