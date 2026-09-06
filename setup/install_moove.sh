@@ -37,6 +37,37 @@ if [ -d "$THEME_DEST" ] && [ ! -d "$THEME_PUBLIC_DEST" ]; then
     cp -a "$THEME_DEST" "$THEME_PUBLIC_DEST"
 fi
 
+echo "[INFO] Checking Moove theme version compatibility..."
+
+get_moodle_version() {
+    local version_file=""
+    if [ -f "$MOODLE_DIR/public/version.php" ]; then
+        version_file="$MOODLE_DIR/public/version.php"
+    elif [ -f "$MOODLE_DIR/version.php" ]; then
+        version_file="$MOODLE_DIR/version.php"
+    fi
+
+    if [ -n "$version_file" ]; then
+        php -r "require '$version_file'; echo \$version;"
+    fi
+}
+
+MOODLE_VERSION=$(get_moodle_version)
+if [ -n "$MOODLE_VERSION" ]; then
+    echo "[INFO] Installed Moodle version: $MOODLE_VERSION"
+
+    # Patch Moove theme version.php to match installed Moodle version
+    for theme_path in "$THEME_PUBLIC_DEST" "$THEME_DEST"; do
+        if [ -f "$theme_path/version.php" ]; then
+            echo "[INFO] Patching $theme_path/version.php for compatibility..."
+            sed -i "s/\$plugin->requires = [0-9]*;/\$plugin->requires = $MOODLE_VERSION;/" "$theme_path/version.php" || true
+            echo "[OK] Patched $theme_path/version.php"
+        fi
+    done
+else
+    echo "[WARN] Could not detect Moodle version. Skipping compatibility patch."
+fi
+
 echo "[INFO] Running Moodle upgrade to register Moove theme..."
 php "$MOODLE_DIR/admin/cli/upgrade.php" --non-interactive --allow-unstable || {
     echo "[WARN] upgrade.php reported issues (continuing)."
