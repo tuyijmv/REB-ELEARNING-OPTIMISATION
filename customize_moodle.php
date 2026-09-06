@@ -407,6 +407,39 @@ foreach ($courses_data as $course_data) {
     $created_courses[$course_data['shortname']] = $course;
 }
 
+// Enroll admin user in all created courses so they appear in My Moodle
+echo "\n--- Enrolling admin user in courses ---\n";
+$admin = $DB->get_record('user', ['username' => 'admin']);
+if ($admin) {
+    foreach ($created_courses as $shortname => $course) {
+        $existing_enrolment = $DB->get_record('user_enrolments', [
+            'userid' => $admin->id,
+            'enrolid' => $DB->get_field('enrol', 'id', ['courseid' => $course->id, 'enrol' => 'manual'])
+        ]);
+        if (!$existing_enrolment) {
+            $enrolid = $DB->get_field('enrol', 'id', ['courseid' => $course->id, 'enrol' => 'manual']);
+            if ($enrolid) {
+                $DB->insert_record('user_enrolments', (object)[
+                    'status'      => 0,
+                    'enrolid'     => $enrolid,
+                    'userid'      => $admin->id,
+                    'timestart'   => 0,
+                    'timeend'     => 0,
+                    'timecreated' => time(),
+                    'timemodified'=> time(),
+                ]);
+                echo "  [OK] Enrolled admin in {$shortname}\n";
+            } else {
+                echo "  [WARN] No manual enrolment instance found for {$shortname}\n";
+            }
+        } else {
+            echo "  [SKIP] Admin already enrolled in {$shortname}\n";
+        }
+    }
+} else {
+    echo "  [WARN] Admin user not found for enrolment\n";
+}
+
 // ===========================================================================
 // 7. COURSE COVER IMAGES
 // ===========================================================================
@@ -436,9 +469,9 @@ foreach ($courses_data as $course_data) {
 echo "\n--- Applying additional settings and modern home page ---\n";
 
 set_config('courselistwidth', 'card', 'moodlecourse');
-set_config('defaulthomepage', 0);  // Site home
-set_config('frontpage', '0');                  // No static front page content
-set_config('frontpageloggedin', '0');
+set_config('defaulthomepage', 1);          // My Moodle
+set_config('frontpage', '6');              // Show enrolled courses
+set_config('frontpageloggedin', '6');
 set_config('registerauth', 'email');
 set_config('supportname', 'REB E-Learning Support');
 set_config('supportemail', 'elearning@reb.rw');

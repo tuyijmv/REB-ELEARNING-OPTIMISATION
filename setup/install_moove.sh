@@ -4,6 +4,7 @@ set -e
 MOODLE_DIR="/var/www/html/moodle_app"
 THEME_NAME="moove"
 THEME_REPO="https://github.com/willianmano/moodle-theme_moove.git"
+THEME_ZIP_URL="https://github.com/willianmano/moodle-theme_moove/archive/refs/heads/main.zip"
 
 echo "=== Moove Theme Installer ==="
 echo ""
@@ -21,12 +22,16 @@ THEME_PUBLIC_DEST="$MOODLE_DIR/public/theme/$THEME_NAME"
 if [ -d "$THEME_DEST" ] || [ -d "$THEME_PUBLIC_DEST" ]; then
     echo "[OK] Moove theme already present."
 else
-    echo "[INFO] Moove theme not found. Cloning from $THEME_REPO ..."
+    echo "[INFO] Moove theme not found. Downloading from $THEME_REPO ..."
     mkdir -p "$MOODLE_DIR/theme"
-    if git clone --depth 1 "$THEME_REPO" "$THEME_DEST"; then
-        echo "[OK] Moove theme cloned to $THEME_DEST"
+    if curl -fsSL "$THEME_ZIP_URL" -o /tmp/moove.zip && \
+       unzip -q /tmp/moove.zip -d /tmp && \
+       mv /tmp/moodle-theme_moove-main "$THEME_DEST"; then
+        echo "[OK] Moove theme downloaded and extracted to $THEME_DEST"
+        rm -f /tmp/moove.zip
+        rm -rf /tmp/moodle-theme_moove-main
     else
-        echo "[ERROR] Failed to clone Moove theme."
+        echo "[ERROR] Failed to download or extract Moove theme."
         exit 1
     fi
 fi
@@ -38,25 +43,16 @@ if [ -d "$THEME_DEST" ] && [ ! -d "$THEME_PUBLIC_DEST" ]; then
 fi
 
 echo "[INFO] Checking Moove theme version compatibility..."
+MOODLE_VERSION=""
+if [ -f "$MOODLE_DIR/public/version.php" ]; then
+    MOODLE_VERSION=$(grep -oP '(?<=\$version\s*=\s*")[0-9]+' "$MOODLE_DIR/public/version.php" || true)
+elif [ -f "$MOODLE_DIR/version.php" ]; then
+    MOODLE_VERSION=$(grep -oP '(?<=\$version\s*=\s*")[0-9]+' "$MOODLE_DIR/version.php" || true)
+fi
 
-get_moodle_version() {
-    local version_file=""
-    if [ -f "$MOODLE_DIR/public/version.php" ]; then
-        version_file="$MOODLE_DIR/public/version.php"
-    elif [ -f "$MOODLE_DIR/version.php" ]; then
-        version_file="$MOODLE_DIR/version.php"
-    fi
-
-    if [ -n "$version_file" ]; then
-        php -r "require '$version_file'; echo \$version;"
-    fi
-}
-
-MOODLE_VERSION=$(get_moodle_version)
 if [ -n "$MOODLE_VERSION" ]; then
     echo "[INFO] Installed Moodle version: $MOODLE_VERSION"
 
-    # Patch Moove theme version.php to match installed Moodle version
     for theme_path in "$THEME_PUBLIC_DEST" "$THEME_DEST"; do
         if [ -f "$theme_path/version.php" ]; then
             echo "[INFO] Patching $theme_path/version.php for compatibility..."
