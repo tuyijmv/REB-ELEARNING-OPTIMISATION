@@ -140,12 +140,37 @@ $frontpage_settings = [
 <p>REB E-Learning provides scalable, reliable, and modern digital learning for schools nationwide.</p>',
     'numbersusers'            => 'Active learners on the platform',
     'numberscourses'          => 'Courses available across all levels',
+    'slidercount'             => '1',
 ];
 
 foreach ($frontpage_settings as $key => $value) {
     set_config($key, $value, 'theme_moove');
     echo "  [OK] theme_moove/$key = $value\n";
 }
+
+// Configure slider image and text via Moodle file API.
+$sliderimage = '/var/www/html/moodle_app/assets/images/image_2.jpg';
+$slidertitle = 'Welcome to REB E-Learning Portal';
+$slidercaption = 'Empowering Rwandan learners with quality digital education. Access courses, resources, and tools anytime, anywhere.';
+
+$fs = get_file_storage();
+$context = context_system::instance();
+$fileinfo = new stdClass();
+$fileinfo->component = 'theme_moove';
+$fileinfo->filearea = 'sliderimage1';
+$fileinfo->itemid = 0;
+$fileinfo->contextid = $context->id;
+$fileinfo->filepath = '/';
+$fileinfo->filename = basename($sliderimage);
+
+$existing = $fs->get_file($context->id, 'theme_moove', 'sliderimage1', 0, '/', basename($sliderimage));
+if ($existing) {
+    $existing->delete();
+}
+$fs->create_file_from_pathname($fileinfo, $sliderimage);
+set_config('slidertitle1', $slidertitle, 'theme_moove');
+set_config('slidercap1', $slidercaption, 'theme_moove');
+echo "  [OK] theme_moove/slider configured\n";
 
 $custom_scss = '
 /* ===== REB E-Learning Custom Styles ===== */
@@ -365,116 +390,161 @@ h1, h2, h3, h4, h5, h6 {
     letter-spacing: -0.02em !important;
 }
 
-/* Hero section with background image */
-.frontpage-hero {
-    background: linear-gradient(135deg, rgba(0,160,220,0.85), rgba(0,166,81,0.75)),
-                url("/moodle_app/assets/images/image_2.jpg") center/cover no-repeat !important;
+/* Slider / Hero carousel */
+#mooveslideshow {
     border-radius: 0 0 40px 40px !important;
-    padding: 5rem 2rem !important;
-    color: white !important;
-    text-shadow: 0 2px 12px rgba(0,0,0,0.35) !important;
-    position: relative !important;
     overflow: hidden !important;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.12) !important;
 }
-.frontpage-hero::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg, rgba(0,160,220,0.85), rgba(0,166,81,0.75));
-    z-index: 1;
+#mooveslideshow .carousel-item img {
+    border-radius: 0 0 40px 40px !important;
+    object-fit: cover !important;
+    height: 420px !important;
 }
-.frontpage-hero > * {
-    position: relative;
-    z-index: 2;
+#mooveslideshow .carousel-caption {
+    background: linear-gradient(135deg, rgba(0,160,220,0.85), rgba(0,166,81,0.75)) !important;
+    border-radius: 20px !important;
+    padding: 2rem !important;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.35) !important;
 }
-.frontpage-hero h1 {
+#mooveslideshow .carousel-caption h5 {
     color: white !important;
-    font-size: 3.2rem !important;
+    font-size: 2.2rem !important;
     font-weight: 800 !important;
-    text-shadow: 0 4px 16px rgba(0,0,0,0.4) !important;
 }
-.frontpage-hero p {
+#mooveslideshow .carousel-caption .caption {
     color: rgba(255,255,255,0.95) !important;
-    font-size: 1.35rem !important;
-    line-height: 1.7 !important;
-    text-shadow: 0 2px 8px rgba(0,0,0,0.3) !important;
+    font-size: 1.2rem !important;
 }
 
-/* Feature cards with glassmorphism */
-.marketing-section .card {
-    background: rgba(255,255,255,0.75) !important;
-    backdrop-filter: blur(12px) !important;
-    border-radius: 20px !important;
-    border: 1px solid rgba(255,255,255,0.3) !important;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.08) !important;
-    transition: all 0.3s ease !important;
-    overflow: hidden !important;
+/* Marketing / Feature section */
+#feature {
+    padding: 3rem 0 !important;
 }
-.marketing-section .card:hover {
-    transform: translateY(-8px) !important;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.15) !important;
-    background: rgba(255,255,255,0.9) !important;
-}
-.marketing-section .card .card-body {
-    padding: 2.2rem !important;
-    background: url("/moodle_app/assets/images/image_1.jpg") bottom right/120px no-repeat !important;
-}
-.marketing-section .card .card-title {
-    color: #1a237e !important;
-    font-size: 1.5rem !important;
-    font-weight: 700 !important;
-    margin-bottom: 1rem !important;
-}
-.marketing-section .card .card-text {
+#feature .marketing-content {
     color: #4a5568 !important;
     font-size: 1.05rem !important;
     line-height: 1.7 !important;
 }
-
-/* Feature icons */
-.frontpage-block .feature-icon,
-.marketing-section .card .feature-icon {
-    width: 64px;
-    height: 64px;
+#feature .card {
+    border: none !important;
+    border-radius: 20px !important;
+    background: rgba(255,255,255,0.85) !important;
+    backdrop-filter: blur(10px) !important;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.08) !important;
+    transition: all 0.3s ease !important;
+    overflow: hidden !important;
+}
+#feature .card:hover {
+    transform: translateY(-8px) !important;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.14) !important;
+    background: rgba(255,255,255,0.95) !important;
+}
+#feature .card .card-body {
+    padding: 2rem !important;
+}
+#feature .icon-lg {
+    width: 64px !important;
+    height: 64px !important;
     border-radius: 16px !important;
     background: linear-gradient(135deg, #00A0DC, #00A651) !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    margin-bottom: 1.2rem !important;
     box-shadow: 0 6px 20px rgba(0,160,220,0.25) !important;
-    color: white !important;
-    font-size: 1.8rem !important;
+    padding: 0 !important;
+}
+#feature .icon-lg img {
+    max-width: 32px !important;
+    max-height: 32px !important;
+    filter: brightness(0) invert(1) !important;
+}
+#feature h5 {
+    color: #1a237e !important;
+    font-size: 1.35rem !important;
+    font-weight: 700 !important;
+    margin-bottom: 0.75rem !important;
+}
+#feature .box-content {
+    color: #4a5568 !important;
+    font-size: 1rem !important;
+    line-height: 1.6 !important;
 }
 
 /* Numbers section */
-.numbers-section {
-    background: linear-gradient(135deg, rgba(0,160,220,0.1), rgba(0,166,81,0.1)) !important;
-    border-radius: 24px !important;
-    padding: 3.5rem 2rem !important;
-    margin: 3rem 0 !important;
-    border: 1px solid rgba(0,160,220,0.15) !important;
+#numbers {
+    padding: 3rem 0 !important;
 }
-.numbers-section h2 {
+#numbers .sectionheading h2 {
     color: #1a237e !important;
     font-size: 2rem !important;
     font-weight: 700 !important;
     margin-bottom: 0.5rem !important;
 }
-.numbers-section p {
+#numbers .sectionheading p {
     color: #4a5568 !important;
     font-size: 1.1rem !important;
 }
-.numbers-section .number {
-    font-size: 3.2rem !important;
-    font-weight: 800 !important;
+#numbers .rate-box {
     background: linear-gradient(135deg, #00A0DC, #00A651) !important;
-    -webkit-background-clip: text !important;
-    -webkit-text-fill-color: transparent !important;
-    background-clip: text !important;
+    border-radius: 20px !important;
+    padding: 2rem !important;
+    text-align: center !important;
+    box-shadow: 0 8px 28px rgba(0,160,220,0.25) !important;
+    transition: transform 0.3s ease !important;
+}
+#numbers .rate-box:hover {
+    transform: translateY(-6px) !important;
+}
+#numbers .rate-box h3 {
+    color: white !important;
+    font-size: 3rem !important;
+    font-weight: 800 !important;
+    margin-bottom: 0.5rem !important;
+}
+#numbers .rate-box p {
+    color: rgba(255,255,255,0.9) !important;
+    font-size: 1rem !important;
+    margin-bottom: 0 !important;
+}
+#numbers .rate-box-2 {
+    background: linear-gradient(135deg, #003366, #00264D) !important;
+    box-shadow: 0 8px 28px rgba(0,51,102,0.25) !important;
+}
+
+/* FAQ section */
+#faq {
+    padding: 3rem 0 !important;
+}
+#faq h2 {
+    color: #1a237e !important;
+    font-size: 2rem !important;
+    font-weight: 700 !important;
+    margin-bottom: 1.5rem !important;
+}
+#faq .accordion-item {
+    border: none !important;
+    border-radius: 16px !important;
+    margin-bottom: 0.75rem !important;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.05) !important;
+    overflow: hidden !important;
+}
+#faq .accordion-button {
+    border-radius: 16px !important;
+    font-weight: 600 !important;
+    color: #1a237e !important;
+    padding: 1.1rem 1.25rem !important;
+    font-size: 1.05rem !important;
+}
+#faq .accordion-button:not(.collapsed) {
+    background: linear-gradient(135deg, rgba(0,160,220,0.1), rgba(0,166,81,0.1)) !important;
+    color: #1a237e !important;
+}
+#faq .accordion-body {
+    padding: 1.25rem !important;
+    color: #4a5568 !important;
+    font-size: 1rem !important;
+    line-height: 1.6 !important;
 }
 
 /* Course cards */
