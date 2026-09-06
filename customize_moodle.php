@@ -351,6 +351,180 @@ body {
     line-height: 1.7 !important;
     color: #4a4a4a !important;
 }
+
+/* ===== Modern Homepage UI/UX ===== */
+body {
+    font-size: 17px !important;
+    color: #2d3748 !important;
+    background: #f7fafc !important;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: #1a237e !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.02em !important;
+}
+
+/* Hero section with background image */
+.frontpage-hero {
+    background: linear-gradient(135deg, rgba(0,160,220,0.85), rgba(0,166,81,0.75)),
+                url('/moodle_app/assets/images/image_2.jpg') center/cover no-repeat !important;
+    border-radius: 0 0 40px 40px !important;
+    padding: 5rem 2rem !important;
+    color: white !important;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.35) !important;
+    position: relative !important;
+    overflow: hidden !important;
+}
+.frontpage-hero::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(0,160,220,0.85), rgba(0,166,81,0.75));
+    z-index: 1;
+}
+.frontpage-hero > * {
+    position: relative;
+    z-index: 2;
+}
+.frontpage-hero h1 {
+    color: white !important;
+    font-size: 3.2rem !important;
+    font-weight: 800 !important;
+    text-shadow: 0 4px 16px rgba(0,0,0,0.4) !important;
+}
+.frontpage-hero p {
+    color: rgba(255,255,255,0.95) !important;
+    font-size: 1.35rem !important;
+    line-height: 1.7 !important;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.3) !important;
+}
+
+/* Feature cards with glassmorphism */
+.marketing-section .card {
+    background: rgba(255,255,255,0.75) !important;
+    backdrop-filter: blur(12px) !important;
+    border-radius: 20px !important;
+    border: 1px solid rgba(255,255,255,0.3) !important;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.08) !important;
+    transition: all 0.3s ease !important;
+    overflow: hidden !important;
+}
+.marketing-section .card:hover {
+    transform: translateY(-8px) !important;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.15) !important;
+    background: rgba(255,255,255,0.9) !important;
+}
+.marketing-section .card .card-body {
+    padding: 2.2rem !important;
+    background: url('/moodle_app/assets/images/image_1.jpg') bottom right/120px no-repeat !important;
+}
+.marketing-section .card .card-title {
+    color: #1a237e !important;
+    font-size: 1.5rem !important;
+    font-weight: 700 !important;
+    margin-bottom: 1rem !important;
+}
+.marketing-section .card .card-text {
+    color: #4a5568 !important;
+    font-size: 1.05rem !important;
+    line-height: 1.7 !important;
+}
+
+/* Feature icons */
+.frontpage-block .feature-icon,
+.marketing-section .card .feature-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 16px !important;
+    background: linear-gradient(135deg, #00A0DC, #00A651) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin-bottom: 1.2rem !important;
+    box-shadow: 0 6px 20px rgba(0,160,220,0.25) !important;
+    color: white !important;
+    font-size: 1.8rem !important;
+}
+
+/* Numbers section */
+.numbers-section {
+    background: linear-gradient(135deg, rgba(0,160,220,0.1), rgba(0,166,81,0.1)) !important;
+    border-radius: 24px !important;
+    padding: 3.5rem 2rem !important;
+    margin: 3rem 0 !important;
+    border: 1px solid rgba(0,160,220,0.15) !important;
+}
+.numbers-section h2 {
+    color: #1a237e !important;
+    font-size: 2rem !important;
+    font-weight: 700 !important;
+    margin-bottom: 0.5rem !important;
+}
+.numbers-section p {
+    color: #4a5568 !important;
+    font-size: 1.1rem !important;
+}
+.numbers-section .number {
+    font-size: 3.2rem !important;
+    font-weight: 800 !important;
+    background: linear-gradient(135deg, #00A0DC, #00A651) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+}
+
+/* Course cards */
+.coursebox {
+    border-radius: 20px !important;
+    border: none !important;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06) !important;
+    transition: all 0.3s ease !important;
+    padding: 1.2rem !important;
+    background: white !important;
+}
+.coursebox:hover {
+    transform: translateY(-6px) !important;
+    box-shadow: 0 16px 40px rgba(0,0,0,0.12) !important;
+}
+.coursebox .course-title {
+    color: #1a237e !important;
+    font-size: 1.35rem !important;
+    font-weight: 700 !important;
+}
+.coursebox .course-summary {
+    color: #4a5568 !important;
+    font-size: 1rem !important;
+    line-height: 1.6 !important;
+}
+.coursebox .course-image {
+    border-radius: 16px 16px 0 0 !important;
+    object-fit: cover !important;
+    height: 200px !important;
+}
+
+/* General improvements */
+.card {
+    border-radius: 16px !important;
+    border: none !important;
+}
+.btn {
+    border-radius: 10px !important;
+    font-weight: 600 !important;
+    padding: 12px 28px !important;
+    font-size: 1rem !important;
+}
+.block {
+    border-radius: 16px !important;
+    border: none !important;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.05) !important;
+}
+.region-content {
+    border-radius: 16px !important;
+}
 ';
 
 set_config('scss', $custom_scss, 'theme_moove');
