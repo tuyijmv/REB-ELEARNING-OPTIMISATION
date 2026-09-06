@@ -94,15 +94,28 @@ if (!is_dir($themedir)) {
 }
 
 // ===========================================================================
-// 3. MOOVE BRAND COLORS + CUSTOM SCSS
+// 3. MOOVE BRAND COLORS + CUSTOM SCSS + MODERN UI SETTINGS
 // ===========================================================================
-echo "\n--- Applying REB brand colors and SCSS ---\n";
+echo "\n--- Applying REB brand colors, SCSS and modern UI settings ---\n";
 
 $moove_settings = [
     'brandcolor'          => '#00A0DC', // Rwanda blue
     'secondarymenucolor'  => '#00A651', // Rwanda green
-    'fontsite'            => 'Inter',   // Modern font (valid Moove option)
+    'fontsite'            => 'Inter',   // Modern font
     'enablecourseindex'   => '1',       // Enable course index
+    'loginwelcometitle'   => 'Welcome to REB E-Learning Portal',
+    'loginwelcomedescription' => 'Access quality education resources anytime, anywhere. Join thousands of learners across Rwanda.',
+    'loginpaneltagline'   => 'Rwanda Education Board',
+    'loginstatusers_value' => '50,000+',
+    'loginstatusers'      => 'Active Learners',
+    'loginstatsites_value'=> '500+',
+    'loginstatsites'      => 'Courses Available',
+    'loginstatcountries_value' => '1',
+    'loginstatcountries'  => 'Country',
+    'loginwelcomeback'    => 'Welcome back! Please sign in to continue your learning journey.',
+    'loginseparatoror'    => 'or',
+    'loginforgotpassword' => 'Forgot your password?',
+    'loginstartsignup'    => 'Create your account',
 ];
 
 foreach ($moove_settings as $key => $value) {
@@ -418,17 +431,24 @@ foreach ($courses_data as $course_data) {
 }
 
 // ===========================================================================
-// 8. ADDITIONAL SITE SETTINGS
+// 8. ADDITIONAL SITE SETTINGS + MODERN HOME PAGE
 // ===========================================================================
-echo "\n--- Applying additional settings ---\n";
+echo "\n--- Applying additional settings and modern home page ---\n";
 
 set_config('courselistwidth', 'card', 'moodlecourse');
-set_config('defaulthomepage', 1);          // My Moodle
-set_config('frontpage', '6');              // Show enrolled courses
-set_config('frontpageloggedin', '6');
+set_config('defaulthomepage', 0);  // Site home
+set_config('frontpage', '0');                  // No static front page content
+set_config('frontpageloggedin', '0');
 set_config('registerauth', 'email');
 set_config('supportname', 'REB E-Learning Support');
 set_config('supportemail', 'elearning@reb.rw');
+set_config('fullname', 'REB E-Learning Portal', 'core');
+set_config('summary', '<p>Welcome to the <strong>Rwanda Education Board E-Learning Portal</strong>. Access quality education resources anytime, anywhere.</p>', 'core');
+set_config('lang', 'en');
+set_config('timezone', 'Africa/Kigali');
+set_config('newsitems', 5);
+set_config('numcourses', 50);
+set_config('maxeditingtime', 18000);
 echo "  [OK] Additional settings applied\n";
 
 // ===========================================================================
