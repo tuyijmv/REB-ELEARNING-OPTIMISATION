@@ -18,6 +18,8 @@ echo "[INFO] Detected Moodle directory: $MOODLE_DIR"
 
 THEME_DEST="$MOODLE_DIR/theme/$THEME_NAME"
 THEME_PUBLIC_DEST="$MOODLE_DIR/public/theme/$THEME_NAME"
+BOOTSTHEME_DEST="$MOODLE_DIR/theme/boost"
+BOOTSTHEME_PUBLIC_DEST="$MOODLE_DIR/public/theme/boost"
 
 if [ -d "$THEME_DEST" ] || [ -d "$THEME_PUBLIC_DEST" ]; then
     echo "[OK] Moove theme already present."
@@ -42,12 +44,20 @@ if [ -d "$THEME_DEST" ] && [ ! -d "$THEME_PUBLIC_DEST" ]; then
     cp -a "$THEME_DEST" "$THEME_PUBLIC_DEST"
 fi
 
+echo "[INFO] Ensuring theme_boost is available for Moove..."
+if [ -d "$BOOTSTHEME_PUBLIC_DEST" ] && [ ! -d "$BOOTSTHEME_DEST" ]; then
+    echo "[INFO] Creating theme/boost symlink from public/theme/boost..."
+    ln -s "$BOOTSTHEME_PUBLIC_DEST" "$BOOTSTHEME_DEST"
+elif [ ! -d "$BOOTSTHEME_DEST" ] && [ ! -d "$BOOTSTHEME_PUBLIC_DEST" ]; then
+    echo "[WARN] theme_boost not found in either theme/boost or public/theme/boost"
+fi
+
 echo "[INFO] Checking Moove theme version compatibility..."
 MOODLE_VERSION=""
 if [ -f "$MOODLE_DIR/public/version.php" ]; then
-    MOODLE_VERSION=$(grep -oP '(?<=\$version\s*=\s*")[0-9]+' "$MOODLE_DIR/public/version.php" || true)
+    MOODLE_VERSION=$(grep -oP '(?<=\$version\s*=\s*['"'"'\"])[0-9]+' "$MOODLE_DIR/public/version.php" || true)
 elif [ -f "$MOODLE_DIR/version.php" ]; then
-    MOODLE_VERSION=$(grep -oP '(?<=\$version\s*=\s*")[0-9]+' "$MOODLE_DIR/version.php" || true)
+    MOODLE_VERSION=$(grep -oP '(?<=\.\$version\s*=\s*['"'"'\"])[0-9]+' "$MOODLE_DIR/version.php" || true)
 fi
 
 if [ -n "$MOODLE_VERSION" ]; then
@@ -60,6 +70,12 @@ if [ -n "$MOODLE_VERSION" ]; then
             echo "[OK] Patched $theme_path/version.php"
         fi
     done
+
+    if [ -f "$BOOTSTHEME_DEST/version.php" ]; then
+        echo "[INFO] Patching $BOOTSTHEME_DEST/version.php for compatibility..."
+        sed -i "s/\$plugin->requires = [0-9]*;/\$plugin->requires = $MOODLE_VERSION;/" "$BOOTSTHEME_DEST/version.php" || true
+        echo "[OK] Patched $BOOTSTHEME_DEST/version.php"
+    fi
 else
     echo "[WARN] Could not detect Moodle version. Skipping compatibility patch."
 fi
