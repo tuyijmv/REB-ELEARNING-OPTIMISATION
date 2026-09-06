@@ -46,8 +46,9 @@ fi
 
 echo "[INFO] Ensuring theme_boost is available for Moove..."
 if [ -d "$BOOTSTHEME_PUBLIC_DEST" ] && [ ! -d "$BOOTSTHEME_DEST" ]; then
-    echo "[INFO] Creating theme/boost symlink from public/theme/boost..."
-    ln -s "$BOOTSTHEME_PUBLIC_DEST" "$BOOTSTHEME_DEST"
+    echo "[INFO] Copying public/theme/boost to theme/boost for compatibility..."
+    mkdir -p "$MOODLE_DIR/theme"
+    cp -a "$BOOTSTHEME_PUBLIC_DEST" "$BOOTSTHEME_DEST"
 elif [ ! -d "$BOOTSTHEME_DEST" ] && [ ! -d "$BOOTSTHEME_PUBLIC_DEST" ]; then
     echo "[WARN] theme_boost not found in either theme/boost or public/theme/boost"
 fi
@@ -55,9 +56,9 @@ fi
 echo "[INFO] Checking Moove theme version compatibility..."
 MOODLE_VERSION=""
 if [ -f "$MOODLE_DIR/public/version.php" ]; then
-    MOODLE_VERSION=$(grep -oP '(?<=\$version\s*=\s*['"'"'\"])[0-9]+' "$MOODLE_DIR/public/version.php" || true)
+    MOODLE_VERSION=$(php -r "require '$MOODLE_DIR/public/version.php'; echo preg_replace('/[^0-9].*/', '', \$version);")
 elif [ -f "$MOODLE_DIR/version.php" ]; then
-    MOODLE_VERSION=$(grep -oP '(?<=\.\$version\s*=\s*['"'"'\"])[0-9]+' "$MOODLE_DIR/version.php" || true)
+    MOODLE_VERSION=$(php -r "require '$MOODLE_DIR/version.php'; echo preg_replace('/[^0-9].*/', '', \$version);")
 fi
 
 if [ -n "$MOODLE_VERSION" ]; then
