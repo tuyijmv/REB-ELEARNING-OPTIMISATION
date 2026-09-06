@@ -368,7 +368,7 @@ h1, h2, h3, h4, h5, h6 {
 /* Hero section with background image */
 .frontpage-hero {
     background: linear-gradient(135deg, rgba(0,160,220,0.85), rgba(0,166,81,0.75)),
-                url('/moodle_app/assets/images/image_2.jpg') center/cover no-repeat !important;
+                url("/moodle_app/assets/images/image_2.jpg") center/cover no-repeat !important;
     border-radius: 0 0 40px 40px !important;
     padding: 5rem 2rem !important;
     color: white !important;
@@ -420,7 +420,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 .marketing-section .card .card-body {
     padding: 2.2rem !important;
-    background: url('/moodle_app/assets/images/image_1.jpg') bottom right/120px no-repeat !important;
+    background: url("/moodle_app/assets/images/image_1.jpg") bottom right/120px no-repeat !important;
 }
 .marketing-section .card .card-title {
     color: #1a237e !important;
