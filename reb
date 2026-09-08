@@ -270,6 +270,12 @@ setup_local() {
         docker compose exec -T moodle_php bash -c "echo '' >> /var/www/html/moodle_app/config.php && echo '\$CFG->reverseproxy = false;' >> /var/www/html/moodle_app/config.php && echo '\$CFG->sslproxy = false;' >> /var/www/html/moodle_app/config.php"
     fi
     
+    # Fix dataroot path in config.php to match the Docker volume mount point.
+    # The installer may write /var/www/html/moodledata, but the named volume is
+    # mounted at /var/www/moodledata in the PHP container.
+    log_info "Verifying dataroot path in config.php..."
+    docker compose exec -T moodle_php php -r "\$f='/var/www/html/moodle_app/config.php'; \$c=file_get_contents(\$f); \$c=str_replace('/var/www/html/moodledata', '/var/www/moodledata', \$c); file_put_contents(\$f, \$c);"
+    
     # Ensure Redis session settings are in config.php
     log_info "Configuring Redis session settings..."
     docker compose exec -T moodle_php bash -c "cat >> /var/www/html/moodle_app/config.php << 'EOF2'
@@ -284,6 +290,16 @@ EOF2"
     # (and any other created files) end up root-owned. PHP-FPM runs as www-data,
     # so fix ownership of the moodle_app volume to avoid "Permission denied".
     docker compose exec -T moodle_php chown -R www-data:www-data /var/www/html/moodle_app
+    
+    # Ensure dataroot directory exists and is writable before running upgrade.
+    log_info "Verifying dataroot directory..."
+    docker compose exec -T moodle_php bash -c "\
+        DATAROOT=\$(php -r 'require \"/var/www/html/moodle_app/config.php\"; echo \$CFG->dataroot;') 2>/dev/null || DATAROOT='/var/www/moodledata'; \
+        echo \"dataroot path: \$DATAROOT\"; \
+        mkdir -p \"\$DATAROOT\"; \
+        chown -R www-data:www-data \"\$DATAROOT\"; \
+        chmod -R 0777 \"\$DATAROOT\"; \
+        echo \"dataroot verified at \$DATAROOT\""
 
     # Run upgrade to register all plugins in the database
     log_info "Running Moodle upgrade..."
@@ -292,6 +308,23 @@ EOF2"
     # Ensure Moove is installed and set as default theme
     log_info "Installing and activating Moove theme..."
     docker compose exec -T moodle_php bash -s < setup/install_moove.sh
+
+    # Ensure latest branding assets are present in the container before customization
+    log_info "Copying branding assets to container..."
+    docker compose cp assets/images/image_2.jpg moodle_php:/var/www/html/moodle_app/assets/images/image_2.jpg || true
+    docker compose cp assets/images/image_1.jpg moodle_php:/var/www/html/moodle_app/assets/images/image_1.jpg || true
+    docker compose cp assets/images/image_5.jpg moodle_php:/var/www/html/moodle_app/assets/images/image_5.jpg || true
+    docker compose cp assets/images/image_6.jfif moodle_php:/var/www/html/moodle_app/assets/images/image_6.jfif || true
+    docker compose cp assets/images/image_7.jpg moodle_php:/var/www/html/moodle_app/assets/images/image_7.jpg || true
+    docker compose cp assets/images/logo.png moodle_php:/var/www/html/moodle_app/assets/images/logo.png || true
+    docker compose cp assets/images/favicon.png moodle_php:/var/www/html/moodle_app/assets/images/favicon.png || true
+    docker compose cp assets/images/login-banner.png moodle_php:/var/www/html/moodle_app/assets/images/login-banner.png || true
+    docker compose cp assets/images/course-cover-math-g10.png moodle_php:/var/www/html/moodle_app/assets/images/course-cover-math-g10.png || true
+    docker compose cp assets/images/course-cover-chem-g11.png moodle_php:/var/www/html/moodle_app/assets/images/course-cover-chem-g11.png || true
+    docker compose cp assets/images/course-cover-bio-g10.png moodle_php:/var/www/html/moodle_app/assets/images/course-cover-bio-g10.png || true
+    docker compose cp assets/images/course-cover-eng-g09.png moodle_php:/var/www/html/moodle_app/assets/images/course-cover-eng-g09.png || true
+    docker compose cp assets/images/course-cover-kin-g09.png moodle_php:/var/www/html/moodle_app/assets/images/course-cover-kin-g09.png || true
+    docker compose cp assets/images/course-cover-his-g11.png moodle_php:/var/www/html/moodle_app/assets/images/course-cover-his-g11.png || true
 
     # Apply REB branding customizations
     log_info "Applying REB customizations..."

@@ -155,19 +155,29 @@ $slidercaption = 'Empowering Rwandan learners with quality digital education. Ac
 
 $fs = get_file_storage();
 $context = context_system::instance();
-$fileinfo = new stdClass();
-$fileinfo->component = 'theme_moove';
-$fileinfo->filearea = 'sliderimage1';
-$fileinfo->itemid = 0;
-$fileinfo->contextid = $context->id;
-$fileinfo->filepath = '/';
-$fileinfo->filename = basename($sliderimage);
 
-$existing = $fs->get_file($context->id, 'theme_moove', 'sliderimage1', 0, '/', basename($sliderimage));
-if ($existing) {
-    $existing->delete();
+if (file_exists($sliderimage)) {
+    $fileinfo = new stdClass();
+    $fileinfo->component = 'theme_moove';
+    $fileinfo->filearea = 'sliderimage1';
+    $fileinfo->itemid = 0;
+    $fileinfo->contextid = $context->id;
+    $fileinfo->filepath = '/';
+    $fileinfo->filename = basename($sliderimage);
+
+    $existing = $fs->get_file($context->id, 'theme_moove', 'sliderimage1', 0, '/', basename($sliderimage));
+    if ($existing) {
+        $existing->delete();
+    }
+    try {
+        $fs->create_file_from_pathname($fileinfo, $sliderimage);
+        echo "  [OK] Uploaded slider image\n";
+    } catch (Exception $e) {
+        echo "  [WARN] Failed to upload slider image: " . $e->getMessage() . "\n";
+    }
+} else {
+    echo "  [WARN] Slider image not found at $sliderimage - skipping upload\n";
 }
-$fs->create_file_from_pathname($fileinfo, $sliderimage);
 set_config('slidertitle1', $slidertitle, 'theme_moove');
 set_config('slidercap1', $slidercaption, 'theme_moove');
 echo "  [OK] theme_moove/slider configured\n";
@@ -514,20 +524,32 @@ $assets_dir = '/var/www/html/moodle_app/assets/images';
 
 if (is_dir($themedir)) {
     if (file_exists($assets_dir . '/logo.png')) {
-        reb_upload_theme_file('logo', $assets_dir . '/logo.png', 'logo.png');
-        echo "  [OK] Uploaded theme logo\n";
+        try {
+            reb_upload_theme_file('logo', $assets_dir . '/logo.png', 'logo.png');
+            echo "  [OK] Uploaded theme logo\n";
+        } catch (Exception $e) {
+            echo "  [WARN] Failed to upload logo: " . $e->getMessage() . "\n";
+        }
     } else {
         echo "  [WARN] Logo not found at {$assets_dir}/logo.png\n";
     }
     if (file_exists($assets_dir . '/favicon.png')) {
-        reb_upload_theme_file('favicon', $assets_dir . '/favicon.png', 'favicon.png');
-        echo "  [OK] Uploaded theme favicon\n";
+        try {
+            reb_upload_theme_file('favicon', $assets_dir . '/favicon.png', 'favicon.png');
+            echo "  [OK] Uploaded theme favicon\n";
+        } catch (Exception $e) {
+            echo "  [WARN] Failed to upload favicon: " . $e->getMessage() . "\n";
+        }
     } else {
         echo "  [WARN] Favicon not found at {$assets_dir}/favicon.png\n";
     }
     if (file_exists($assets_dir . '/login-banner.png')) {
-        reb_upload_theme_file('loginbgimg', $assets_dir . '/login-banner.png', 'login-banner.png');
-        echo "  [OK] Uploaded login background\n";
+        try {
+            reb_upload_theme_file('loginbgimg', $assets_dir . '/login-banner.png', 'login-banner.png');
+            echo "  [OK] Uploaded login background\n";
+        } catch (Exception $e) {
+            echo "  [WARN] Failed to upload login background: " . $e->getMessage() . "\n";
+        }
     } else {
         echo "  [WARN] Login banner not found at {$assets_dir}/login-banner.png\n";
     }
@@ -703,8 +725,12 @@ foreach ($courses_data as $course_data) {
     $cover_path = $assets_dir . '/' . $cover_filename;
 
     if (file_exists($cover_path)) {
-        reb_upload_course_cover($course->id, $cover_path, 'cover.png');
-        echo "  [OK] Cover for {$course_data['shortname']}\n";
+        try {
+            reb_upload_course_cover($course->id, $cover_path, 'cover.png');
+            echo "  [OK] Cover for {$course_data['shortname']}\n";
+        } catch (Exception $e) {
+            echo "  [WARN] Failed to upload cover for {$course_data['shortname']}: " . $e->getMessage() . "\n";
+        }
     } else {
         echo "  [WARN] Cover image not found at {$cover_path}\n";
     }
